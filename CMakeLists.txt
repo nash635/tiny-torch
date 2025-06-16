@@ -44,6 +44,7 @@ elseif(MSVC)
 endif()
 
 # Find packages
+find_package(Threads REQUIRED)
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
 # Find pybind11

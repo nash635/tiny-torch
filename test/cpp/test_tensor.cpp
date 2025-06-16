@@ -1,23 +1,18 @@
 /*
  * test_tensor.cpp
- * 张量C++测试 (占位符)
+ * 张量C++测试 (简化版本)
  */
 
-#include <gtest/gtest.h>
+#include <iostream>
+#include <cassert>
 
-// TODO: Phase 1.2 实现后添加真实的张量测试
-
-TEST(TensorTest, PlaceholderTest) {
-    // 占位符测试，确保测试框架正常工作
-    EXPECT_EQ(1 + 1, 2);
-}
-
-TEST(TensorTest, BasicConstruction) {
-    // TODO: 实现张量构造测试
-    GTEST_SKIP() << "Tensor implementation pending in Phase 1.2";
-}
-
-TEST(TensorTest, BasicOperations) {
-    // TODO: 实现张量操作测试
-    GTEST_SKIP() << "Tensor operations pending in Phase 2";
+// 简化的测试函数
+void test_tensor_basic() {
+    // 占位符测试，确保基本逻辑正常工作
+    assert(1 + 1 == 2);
+    
+    // TODO: Phase 1.2 实现后添加真实的张量测试
+    std::cout << "  - Basic math test passed" << std::endl;
+    std::cout << "  - Tensor construction test skipped (pending Phase 1.2)" << std::endl;
+    std::cout << "  - Tensor operations test skipped (pending Phase 1.2)" << std::endl;
 }

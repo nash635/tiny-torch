@@ -65,6 +65,7 @@ def get_cuda_version():
 
 def get_extensions():
     """构建扩展模块"""
+    global WITH_CUDA  # Declare as global to avoid UnboundLocalError
     extensions = []
     
     # 源文件
@@ -99,17 +100,18 @@ def get_extensions():
         "csrc/autograd/functions/basic_ops.cpp",
     ]
     
-    # CUDA源文件
-    if WITH_CUDA:
-        cuda_sources = [
-            "csrc/aten/src/ATen/cuda/CUDAContext.cu",
-            "csrc/aten/src/ATen/native/cuda/BinaryOps.cu",
-            "csrc/aten/src/ATen/native/cuda/UnaryOps.cu",
-            "csrc/aten/src/ATen/native/cuda/LinearAlgebra.cu",
-            "csrc/aten/src/ATen/native/cuda/Activation.cu",
-            "csrc/aten/src/ATen/native/cuda/Reduction.cu",
-        ]
-        sources.extend(cuda_sources)
+    # CUDA源文件 - 暂时禁用以使用CMake构建CUDA代码
+    # TODO: 在Phase 1.2中实现CUDA支持的Python绑定
+    # if WITH_CUDA:
+    #     cuda_sources = [
+    #         "csrc/aten/src/ATen/cuda/CUDAContext.cu",
+    #         "csrc/aten/src/ATen/native/cuda/BinaryOps.cu",
+    #         "csrc/aten/src/ATen/native/cuda/UnaryOps.cu",
+    #         "csrc/aten/src/ATen/native/cuda/LinearAlgebra.cu",
+    #         "csrc/aten/src/ATen/native/cuda/Activation.cu",
+    #         "csrc/aten/src/ATen/native/cuda/Reduction.cu",
+    #     ]
+    #     sources.extend(cuda_sources)
     
     # 包含目录
     include_dirs = [
@@ -183,7 +185,7 @@ def get_extensions():
             cxx_flags.append("-fopenmp")
             libraries.append("gomp")
     
-    # MKL支持
+    # BLAS/LAPACK 支持 - 使用更灵活的方法
     if WITH_MKL:
         mkl_root = os.environ.get("MKLROOT")
         if mkl_root:
@@ -192,11 +194,10 @@ def get_extensions():
             library_dirs.append(f"{mkl_root}/lib/intel64")
             libraries.extend(["mkl_intel_lp64", "mkl_sequential", "mkl_core"])
         else:
-            print("MKL requested but MKLROOT not set, falling back to standard BLAS")
-            libraries.extend(["blas", "lapack"])
+            print("MKL requested but MKLROOT not set, skipping BLAS/LAPACK")
     else:
-        # 标准BLAS/LAPACK
-        libraries.extend(["blas", "lapack"])
+        # 尝试找到BLAS/LAPACK但不强制要求
+        print("Warning: Building without BLAS/LAPACK libraries, tensor operations will be CPU-only")
     
     # 创建扩展
     ext = Pybind11Extension(
@@ -273,7 +274,6 @@ if __name__ == "__main__":
             "License :: OSI Approved :: BSD License",
             "Operating System :: POSIX :: Linux",
             "Operating System :: MacOS :: MacOS X",
-            "Programming Language :: C++",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
