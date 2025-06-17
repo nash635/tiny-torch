@@ -22,6 +22,7 @@ def add(*args, **kwargs):
 from . import nn
 from . import optim
 from . import autograd
+from . import cuda
 
 # 导出主要接口
 __all__ = [
@@ -30,5 +31,6 @@ __all__ = [
     'nn',
     'optim', 
     'autograd',
+    'cuda',
     '__version__'
 ]
