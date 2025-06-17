@@ -10,7 +10,7 @@ from pathlib import Path
 
 # 获取项目根目录
 if '__file__' in globals():
-    PROJECT_ROOT = Path(__file__).parent
+    PROJECT_ROOT = Path(__file__).parent.parent  # 从test/目录向上一级到项目根目录
 else:
     PROJECT_ROOT = Path.cwd()
 sys.path.insert(0, str(PROJECT_ROOT))
