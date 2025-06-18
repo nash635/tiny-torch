@@ -19,6 +19,29 @@ option(WITH_OPENMP "Enable OpenMP support" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 
+# Ninja generator optimization
+if(CMAKE_GENERATOR STREQUAL "Ninja")
+    message(STATUS "Using Ninja generator - enabling optimizations")
+    
+    # 启用颜色输出 (暂时禁用以避免编译器兼容性问题)
+    # TODO: 重新启用颜色输出当检测到正确的编译器时
+    # if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    #     add_compile_options(-fcolor-diagnostics)
+    # elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    #     add_compile_options(-fdiagnostics-color=always)
+    # endif()
+    
+    # 优化并行编译
+    if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
+        include(ProcessorCount)
+        ProcessorCount(N)
+        if(NOT N EQUAL 0)
+            set(CMAKE_BUILD_PARALLEL_LEVEL ${N} CACHE STRING "Number of parallel build jobs")
+            message(STATUS "Setting parallel build jobs to ${N}")
+        endif()
+    endif()
+endif()
+
 # Set default build type if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
