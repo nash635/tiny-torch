@@ -8,21 +8,29 @@ help:
 	@echo "Tiny-Torch Build System"
 	@echo "======================="
 	@echo "Available targets:"
-	@echo "  help       - Show this help message"
-	@echo "  clean      - Clean build artifacts"
-	@echo "  build      - Build the project"
-	@echo "  install    - Install the package"
-	@echo "  test       - Run tests"
-	@echo "  test-cuda  - Run CUDA tests"
-	@echo "  lint       - Run code quality checks"
-	@echo "  format     - Format code"
-	@echo "  docs       - Build documentation"
-	@echo "  benchmark  - Run benchmarks"
+	@echo "  help        - Show this help message"
+	@echo "  diagnose    - Run build diagnostics"
+	@echo "  clean       - Clean build artifacts"
+	@echo "  build       - Build C++ extensions only"
+	@echo "  install     - Complete installation (recommended)"
+	@echo "  install-full- Full installation with diagnostics"
+	@echo "  test        - Run tests"
+	@echo "  test-cuda   - Run CUDA tests"
+	@echo "  lint        - Run code quality checks"
+	@echo "  format      - Format code"
+	@echo "  docs        - Build documentation"
+	@echo "  benchmark   - Run benchmarks"
+	@echo ""
+	@echo "Recommended workflow:"
+	@echo "  make install  # First-time or production setup"
+	@echo "  make build    # Development/quick compilation"
+	@echo "  make test     # Verify functionality"
 	@echo ""
 	@echo "Environment variables:"
-	@echo "  WITH_CUDA=1    - Enable CUDA support"
-	@echo "  WITH_MKL=1     - Enable Intel MKL"
-	@echo "  DEBUG=1        - Debug build"
+	@echo "  WITH_CUDA=1   - Enable CUDA support"
+	@echo "  WITH_MKL=1    - Enable Intel MKL"
+	@echo "  DEBUG=1       - Debug build"
+	@echo "  USE_NINJA=1   - Force Ninja backend"
 	@echo "  VERBOSE=1      - Verbose output"
 
 # 清理构建产物
@@ -37,18 +45,30 @@ clean:
 	rm -rf htmlcov/
 	find . -name "*.pyc" -delete
 	find . -name "*.so" -delete
-	find . -name "*.dylib" -delete
 	@echo "Clean completed."
+
+# 诊断构建问题
+diagnose:
+	@echo "Running build diagnostics..."
+	python diagnose_build.py
 
 # 构建项目
 build:
 	@echo "Building Tiny-Torch..."
 	python setup.py build_ext --inplace
 
-# 安装项目
-install: build
-	@echo "Installing Tiny-Torch..."
-	pip install -e .
+# 安装项目 (改进版本处理多个.egg-info目录问题)
+install: clean
+	@echo "Installing Tiny-Torch (with cleanup)..."
+	pip install -r requirements.txt
+	python setup.py build_ext --inplace
+	pip install -e . --no-deps
+
+# 完整安装 (使用专用脚本)
+install-full:
+	@echo "Full installation with diagnostics..."
+	chmod +x install_tiny_torch.sh
+	./install_tiny_torch.sh
 
 # 运行测试
 test: install

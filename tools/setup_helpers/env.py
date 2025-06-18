@@ -112,7 +112,7 @@ def check_compiler():
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
     
-    # 检查Clang (macOS默认)
+    # 检查 Clang (Linux 备用编译器)
     if not compiler_info['type']:
         try:
             result = subprocess.run(

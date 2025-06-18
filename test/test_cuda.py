@@ -11,9 +11,11 @@ import sys
 import os
 import time
 import argparse
+from pathlib import Path
 
-# 添加项目路径
-sys.path.insert(0, '/home/jian.sha/tiny-torch')
+# 动态获取项目根目录路径
+PROJECT_ROOT = Path(__file__).parent.parent.resolve()
+sys.path.insert(0, str(PROJECT_ROOT))
 
 def run_environment_tests():
     """运行环境测试"""
@@ -165,8 +167,8 @@ def run_build_tests():
     
     # 检查CMake配置
     print("🔍 检查CMake CUDA配置...")
-    cmake_file = "/home/jian.sha/tiny-torch/CMakeLists.txt"
-    if os.path.exists(cmake_file):
+    cmake_file = PROJECT_ROOT / "CMakeLists.txt"
+    if cmake_file.exists():
         with open(cmake_file, 'r') as f:
             content = f.read()
         
@@ -199,8 +201,8 @@ def run_build_tests():
     
     all_exist = True
     for cuda_file in cuda_files:
-        full_path = f"/home/jian.sha/tiny-torch/{cuda_file}"
-        if os.path.exists(full_path):
+        full_path = PROJECT_ROOT / cuda_file
+        if full_path.exists():
             print(f"   ✓ {cuda_file}")
         else:
             print(f"   ✗ {cuda_file}")
@@ -210,12 +212,22 @@ def run_build_tests():
     
     # 检查构建产物
     print("\n🔍 检查构建产物...")
-    lib_file = "/home/jian.sha/tiny-torch/build_cmake/libtiny_torch_cpp.a"
-    if os.path.exists(lib_file):
-        lib_size = os.path.getsize(lib_file)
-        print(f"   ✓ 静态库: {lib_size // 1024} KB")
-        results['构建产物'] = True
-    else:
+    # 查找可能的构建目录和静态库
+    possible_lib_paths = [
+        PROJECT_ROOT / "build" / "cmake" / "libtiny_torch_cpp.a",  # 标准构建目录
+        PROJECT_ROOT / "build" / "libtiny_torch_cpp.a"            # 备用位置
+    ]
+    
+    lib_found = False
+    for lib_file in possible_lib_paths:
+        if lib_file.exists():
+            lib_size = lib_file.stat().st_size
+            print(f"   ✓ 静态库: {lib_size // 1024} KB ({lib_file.relative_to(PROJECT_ROOT)})")
+            results['构建产物'] = True
+            lib_found = True
+            break
+    
+    if not lib_found:
         print("   ✗ 静态库文件不存在")
         results['构建产物'] = False
     

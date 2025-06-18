@@ -22,6 +22,15 @@ add_executable(tiny_torch_cpp_tests ${TEST_SOURCES})
 # 设置C++17标准
 target_compile_features(tiny_torch_cpp_tests PRIVATE cxx_std_17)
 
+# Fix runtime library path conflicts for test executable - comprehensive approach
+set_target_properties(tiny_torch_cpp_tests PROPERTIES
+    # Disable automatic RPATH generation to avoid conda conflicts
+    SKIP_BUILD_RPATH TRUE
+    SKIP_INSTALL_RPATH TRUE
+    # Use explicit linking without RPATH dependencies
+    LINK_WHAT_YOU_USE TRUE
+)
+
 # 链接线程库
 target_link_libraries(tiny_torch_cpp_tests 
     PRIVATE 

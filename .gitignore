@@ -2,13 +2,13 @@
 
 # Build directories
 build/
+build_*/
 dist/
 *.egg-info/
 __pycache__/
 *.pyc
 *.pyo
 *.so
-*.dylib
 *.dll
 
 # IDE files

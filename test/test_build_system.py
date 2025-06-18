@@ -13,8 +13,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-class TestFailure(Exception):
-    """测试失败异常"""
+class BuildSystemTestFailure(Exception):
+    """构建系统测试失败异常"""
     pass
 
 def test_import_torch():
@@ -22,10 +22,10 @@ def test_import_torch():
     try:
         import torch
         if torch.__version__ != "0.1.0":
-            raise TestFailure(f"Expected version 0.1.0, got {torch.__version__}")
+            raise BuildSystemTestFailure(f"Expected version 0.1.0, got {torch.__version__}")
         print(f"✓ Successfully imported torch v{torch.__version__}")
     except ImportError as e:
-        raise TestFailure(f"Failed to import torch: {e}")
+        raise BuildSystemTestFailure(f"Failed to import torch: {e}")
 
 def test_submodule_imports():
     """测试子模块导入"""
@@ -35,7 +35,7 @@ def test_submodule_imports():
         import torch.autograd
         print("✓ Successfully imported all submodules")
     except ImportError as e:
-        raise TestFailure(f"Failed to import submodules: {e}")
+        raise BuildSystemTestFailure(f"Failed to import submodules: {e}")
 
 def test_placeholder_functions():
     """测试占位符函数是否正确抛出NotImplementedError"""
@@ -43,25 +43,25 @@ def test_placeholder_functions():
     
     try:
         torch.tensor([1, 2, 3])
-        raise TestFailure("torch.tensor should raise NotImplementedError")
+        raise BuildSystemTestFailure("torch.tensor should raise NotImplementedError")
     except NotImplementedError:
         pass
     
     try:
         torch.add(1, 2)
-        raise TestFailure("torch.add should raise NotImplementedError")
+        raise BuildSystemTestFailure("torch.add should raise NotImplementedError")
     except NotImplementedError:
         pass
     
     try:
         torch.nn.Module()
-        raise TestFailure("torch.nn.Module should raise NotImplementedError")
+        raise BuildSystemTestFailure("torch.nn.Module should raise NotImplementedError")
     except NotImplementedError:
         pass
     
     try:
         torch.optim.SGD([])
-        raise TestFailure("torch.optim.SGD should raise NotImplementedError")
+        raise BuildSystemTestFailure("torch.optim.SGD should raise NotImplementedError")
     except NotImplementedError:
         pass
     
@@ -84,7 +84,7 @@ def test_build_environment():
         print(f"  Architecture: {env['architecture']}")
         
     except Exception as e:
-        raise TestFailure(f"Build environment check failed: {e}")
+        raise BuildSystemTestFailure(f"Build environment check failed: {e}")
 
 def test_cmake_availability():
     """测试CMake是否可用"""
@@ -115,7 +115,7 @@ def test_project_structure():
     for dir_name in required_dirs:
         dir_path = PROJECT_ROOT / dir_name
         if not dir_path.exists():
-            raise TestFailure(f"Required directory {dir_name} not found")
+            raise BuildSystemTestFailure(f"Required directory {dir_name} not found")
     
     required_files = [
         "CMakeLists.txt",
@@ -131,7 +131,7 @@ def test_project_structure():
     for file_name in required_files:
         file_path = PROJECT_ROOT / file_name
         if not file_path.exists():
-            raise TestFailure(f"Required file {file_name} not found")
+            raise BuildSystemTestFailure(f"Required file {file_name} not found")
     
     print("✓ Project structure is complete")
 
