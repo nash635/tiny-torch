@@ -111,7 +111,6 @@ if [[ "$CLEAN_BUILD" == "1" ]]; then
     find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
     find . -name "*.pyc" -delete 2>/dev/null || true
     find . -name "*.so" -delete 2>/dev/null || true
-    find . -name "*.dylib" -delete 2>/dev/null || true
 fi
 
 # 创建构建目录

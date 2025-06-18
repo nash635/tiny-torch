@@ -1,11 +1,44 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
+# Fix conda environment library conflicts - set global policies
+if(DEFINED ENV{CONDA_PREFIX})
+    message(STATUS "Conda environment detected: $ENV{CONDA_PREFIX}")
+    # Set policies to handle conda library conflicts
+    cmake_policy(SET CMP0060 NEW)  # Link libraries by full path
+    if(POLICY CMP0135)
+        cmake_policy(SET CMP0135 NEW)  # Use download timestamp
+    endif()
+    
+    # Disable automatic RPATH generation for conda environments
+    set(CMAKE_SKIP_BUILD_RPATH TRUE)
+    set(CMAKE_SKIP_INSTALL_RPATH TRUE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    
+    message(STATUS "Applied conda-specific CMake policies to avoid library conflicts")
+endif()
+
+# Improve build output formatting
+set(CMAKE_COLOR_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+
+# Force colored output for better readability
+# Enable for all generators, not just Ninja
+set(CMAKE_COLOR_DIAGNOSTICS ON)
+if(CMAKE_GENERATOR STREQUAL "Ninja")
+    # Additional Ninja-specific optimizations can go here
+endif()
+
 # Project definition
 project(tiny-torch 
     VERSION 0.1.0
     DESCRIPTION "A PyTorch-inspired deep learning framework"
     LANGUAGES CXX C
 )
+
+# 仅支持 Linux 平台 - 在 project() 之后检查
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "This project only supports Linux. Current platform: ${CMAKE_SYSTEM_NAME}")
+endif()
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -19,17 +52,26 @@ option(WITH_OPENMP "Enable OpenMP support" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 
-# Ninja generator optimization
+# 启用彩色输出 - 对所有编译器和生成器
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC彩色诊断
+    add_compile_options(-fdiagnostics-color=always)
+    message(STATUS "Enabled GCC color diagnostics for all generators")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Clang彩色诊断
+    add_compile_options(-fcolor-diagnostics)
+    message(STATUS "Enabled Clang color diagnostics for all generators")
+endif()
+
+# 为CUDA编译器设置彩色输出
+if(WITH_CUDA AND CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler=-fdiagnostics-color=always")
+    message(STATUS "Enabled CUDA compiler color diagnostics")
+endif()
+
+# Ninja generator specific optimizations
 if(CMAKE_GENERATOR STREQUAL "Ninja")
     message(STATUS "Using Ninja generator - enabling optimizations")
-    
-    # 启用颜色输出 (暂时禁用以避免编译器兼容性问题)
-    # TODO: 重新启用颜色输出当检测到正确的编译器时
-    # if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    #     add_compile_options(-fcolor-diagnostics)
-    # elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    #     add_compile_options(-fdiagnostics-color=always)
-    # endif()
     
     # 优化并行编译
     if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
@@ -173,6 +215,13 @@ if(WITH_CUDA)
         csrc/aten/src/ATen/native/cuda/Reduction.cu
     )
     list(APPEND ATEN_SOURCES ${ATEN_CUDA_SOURCES})
+    
+    # Set CUDA-specific compiler options to reduce warnings
+    set_property(SOURCE ${ATEN_CUDA_SOURCES} PROPERTY COMPILE_OPTIONS
+        $<$<COMPILE_LANGUAGE:CUDA>:-Wno-deprecated-declarations>
+        $<$<COMPILE_LANGUAGE:CUDA>:-Wno-unknown-pragmas>
+        $<$<COMPILE_LANGUAGE:CUDA>:--disable-warnings>
+    )
 endif()
 
 # Create the main library
@@ -206,11 +255,25 @@ endif()
 pybind11_add_module(_C ${API_SOURCES})
 target_link_libraries(_C PRIVATE tiny_torch_cpp)
 
-# Set properties for the Python module
+# Fix runtime library path conflicts - comprehensive approach
 set_target_properties(_C PROPERTIES
     CXX_VISIBILITY_PRESET "hidden"
     CUDA_VISIBILITY_PRESET "hidden"
+    # Disable automatic RPATH generation to avoid conflicts
+    SKIP_BUILD_RPATH TRUE
+    SKIP_INSTALL_RPATH TRUE
+    # Use explicit linking without RPATH dependencies
+    LINK_WHAT_YOU_USE TRUE
 )
+
+# Handle OpenMP linking explicitly to avoid conda conflicts
+if(WITH_OPENMP AND OpenMP_CXX_FOUND)
+    # Link OpenMP directly without RPATH dependencies
+    target_link_libraries(_C PRIVATE OpenMP::OpenMP_CXX)
+    # Set explicit compiler flags instead of relying on RPATH
+    target_compile_options(_C PRIVATE ${OpenMP_CXX_FLAGS})
+    target_link_options(_C PRIVATE ${OpenMP_CXX_FLAGS})
+endif()
 
 # Compiler-specific properties
 target_compile_definitions(_C PRIVATE VERSION_INFO=${PROJECT_VERSION})

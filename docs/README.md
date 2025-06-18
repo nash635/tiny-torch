@@ -22,7 +22,7 @@
 - **CMake + setuptools + Ninja** 三层架构 ⚡ 2-4x 性能提升
 - **PyTorch风格集成** - 开发者友好的构建流程
 - **智能后端选择** - 自动使用最佳构建工具
-- **跨平台支持** - Linux/Windows/macOS 统一体验
+- **跨平台支持** - [Linux/Windows(WIP)/MacOS(WIP)]
 
 #### 构建和开发
 - [CHANGELOG.md](../CHANGELOG.md) - 版本更新记录

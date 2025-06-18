@@ -30,12 +30,70 @@ WITH_MKL = os.getenv("WITH_MKL", "0") == "1"
 WITH_OPENMP = os.getenv("WITH_OPENMP", "1") == "1"
 VERBOSE = os.getenv("VERBOSE", "0") == "1"
 
-# Ninja will be set after compatibility test
-
 # Paths
 ROOT_DIR = Path(__file__).parent.absolute()
 CSRC_DIR = ROOT_DIR / "csrc"
 BUILD_DIR = ROOT_DIR / "build"
+
+def test_ninja_compatibility():
+    """测试Ninja是否真正可用"""
+    if not shutil.which("ninja"):
+        return False
+        
+    try:
+        # 测试ninja版本命令
+        result = subprocess.run(
+            ["ninja", "--version"], 
+            capture_output=True, 
+            text=True, 
+            check=True,
+            timeout=5
+        )
+        version = result.stdout.strip()
+        if VERBOSE:
+            print(f"Ninja version: {version}")
+        return True
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+def should_use_ninja():
+    """智能判断是否应该使用Ninja"""
+    # 检查环境变量设置
+    if os.getenv("USE_NINJA", "1") == "0":
+        return False
+        
+    # 检查Ninja兼容性
+    if not test_ninja_compatibility():
+        if VERBOSE:
+            print("Ninja compatibility test failed, falling back to Make")
+        return False
+        
+    return True
+
+# 设置USE_NINJA变量
+USE_NINJA = should_use_ninja()
+
+def setup_color_output():
+    """设置强制彩色输出的环境变量"""
+    # 设置各种工具的彩色输出环境变量
+    color_env = {
+        'FORCE_COLOR': '1',
+        'CMAKE_COLOR_MAKEFILE': 'ON',
+        'CMAKE_COLOR_DIAGNOSTICS': 'ON', 
+        'CMAKE_FORCE_COLORED_OUTPUT': 'ON',
+        'CLICOLOR_FORCE': '1',
+        'NINJA_STATUS': '[%f/%t] ',
+        # 为编译器设置彩色输出
+        'CFLAGS': os.environ.get('CFLAGS', '') + ' -fdiagnostics-color=always',
+        'CXXFLAGS': os.environ.get('CXXFLAGS', '') + ' -fdiagnostics-color=always',
+    }
+    
+    # 更新环境变量
+    for key, value in color_env.items():
+        os.environ[key] = value
+    
+    if VERBOSE:
+        print("✅ Enabled forced color output for build tools")
 
 def check_env():
     """检查构建环境"""
@@ -96,44 +154,6 @@ def get_sources():
     
     return sources
 
-def test_ninja_compatibility():
-    """测试Ninja是否真正可用"""
-    if not shutil.which("ninja"):
-        return False
-        
-    try:
-        # 测试ninja版本命令
-        result = subprocess.run(
-            ["ninja", "--version"], 
-            capture_output=True, 
-            text=True, 
-            check=True,
-            timeout=5
-        )
-        version = result.stdout.strip()
-        if VERBOSE:
-            print(f"Ninja version: {version}")
-        return True
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
-        return False
-
-def should_use_ninja():
-    """智能判断是否应该使用Ninja"""
-    # 检查环境变量设置
-    if os.getenv("USE_NINJA", "1") == "0":
-        return False
-        
-    # 检查Ninja兼容性
-    if not test_ninja_compatibility():
-        if VERBOSE:
-            print("Ninja compatibility test failed, falling back to Make")
-        return False
-        
-    return True
-
-# 更新USE_NINJA的设置
-USE_NINJA = should_use_ninja()
-
 def use_cmake_build():
     """检查是否应该使用CMake构建 (当项目变复杂时)"""
     # 当源文件数量超过阈值时，使用CMake+ninja构建
@@ -143,6 +163,9 @@ def use_cmake_build():
 def cmake_build():
     """使用CMake+ninja构建"""
     print("Using CMake+ninja build system...")
+    
+    # 设置彩色输出
+    setup_color_output()
     
     # 创建构建目录
     cmake_build_dir = BUILD_DIR / "cmake"
@@ -251,6 +274,9 @@ def cmake_build():
     """使用CMake+ninja构建"""
     print("Using CMake+ninja build system...")
     
+    # 设置彩色输出
+    setup_color_output()
+    
     # 创建构建目录
     cmake_build_dir = BUILD_DIR / "cmake"
     cmake_build_dir.mkdir(parents=True, exist_ok=True)
@@ -325,11 +351,11 @@ def get_extensions():
     else:
         cxx_flags.extend(["-O3", "-DNDEBUG"])
     
-    # 平台特定选项
-    if platform.system() == "Darwin":  # macOS
-        cxx_flags.extend(["-stdlib=libc++"])
-    elif platform.system() == "Linux":
+    # Linux 系统特定选项
+    if platform.system() == "Linux":
         cxx_flags.extend(["-Wall", "-Wextra"])
+    else:
+        raise RuntimeError(f"Unsupported platform: {platform.system()}. Only Linux is supported.")
     
     # 链接库
     libraries = []
@@ -358,29 +384,11 @@ def get_extensions():
             print("CUDA requested but nvcc not found, disabling CUDA")
             WITH_CUDA = False
     
-    # OpenMP支持
+    # OpenMP支持 - 仅限 Linux
     if WITH_OPENMP:
         cxx_flags.append("-DWITH_OPENMP")
-        if platform.system() == "Darwin":
-            # macOS通常使用clang，可能需要单独安装libomp
-            try:
-                result = subprocess.run(
-                    ["brew", "--prefix", "libomp"], 
-                    capture_output=True, 
-                    text=True
-                )
-                if result.returncode == 0:
-                    omp_prefix = result.stdout.strip()
-                    include_dirs.append(f"{omp_prefix}/include")
-                    library_dirs.append(f"{omp_prefix}/lib")
-                    libraries.append("omp")
-                    cxx_flags.append("-Xpreprocessor")
-                    cxx_flags.append("-fopenmp")
-            except FileNotFoundError:
-                print("Warning: libomp not found via brew")
-        else:
-            cxx_flags.append("-fopenmp")
-            libraries.append("gomp")
+        cxx_flags.append("-fopenmp")
+        libraries.append("gomp")
     
     # BLAS/LAPACK 支持 - 使用更灵活的方法
     if WITH_MKL:
@@ -440,6 +448,9 @@ class CustomBuildExt(build_ext):
         super().build_extensions()
     
     def run(self):
+        # 设置彩色输出
+        setup_color_output()
+        
         # 确保构建目录存在
         BUILD_DIR.mkdir(exist_ok=True)
         super().run()
@@ -450,39 +461,40 @@ if __name__ == "__main__":
     # 如果源文件较多或需要CUDA支持，使用CMake构建
     if use_cmake_build():
         cmake_build()
-    else:
-        setup(
-            name=PACKAGE_NAME,
-            version=VERSION,
-            description=DESCRIPTION,
-            long_description=get_long_description(),
-            long_description_content_type="text/markdown",
-            author=AUTHOR,
-            author_email=EMAIL,
-            url=URL,
-            
-            packages=find_packages(exclude=["test*", "benchmarks*"]),
-            ext_modules=get_extensions(),
-            cmdclass={"build_ext": CustomBuildExt},
-            
-            install_requires=get_requirements(),
-            python_requires=">=3.8",
-            
-            classifiers=[
-                "Development Status :: 3 - Alpha",
-                "Intended Audience :: Developers",
-                "Intended Audience :: Science/Research",
-                "License :: OSI Approved :: BSD License",
-                "Operating System :: POSIX :: Linux",
-                "Operating System :: MacOS :: MacOS X",
-                "Programming Language :: Python :: 3",
-                "Programming Language :: Python :: 3.8",
-                "Programming Language :: Python :: 3.9",
-                "Programming Language :: Python :: 3.10",
-                "Programming Language :: Python :: 3.11",
-                "Topic :: Scientific/Engineering :: Artificial Intelligence",
-            ],
-            
-            zip_safe=False,
-            include_package_data=True,
-        )
+
+# Setup configuration (always available for pip)
+setup(
+    name=PACKAGE_NAME,
+    version=VERSION,
+    description=DESCRIPTION,
+    long_description=get_long_description(),
+    long_description_content_type="text/markdown",
+    author=AUTHOR,
+    author_email=EMAIL,
+    url=URL,
+    
+    packages=find_packages(exclude=["test*", "benchmarks*"]),
+    ext_modules=get_extensions() if not use_cmake_build() else [],
+    cmdclass={"build_ext": CustomBuildExt},
+    
+    # Dependencies are now managed in pyproject.toml to avoid duplication
+    # install_requires=get_requirements(),  # Commented out to avoid setuptools warning
+    python_requires=">=3.8",
+    
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    ],
+    
+    zip_safe=False,
+    include_package_data=True,
+)

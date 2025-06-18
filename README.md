@@ -30,9 +30,11 @@ $ python verify_phase1_1.py
 ✅ 基本功能 检查通过
 
 # 可用的构建命令
-$ make build        # 完整构建
+$ make install      # 完整安装 (推荐)
+$ make build        # 仅编译 (开发用)
 $ make test         # 运行测试
 $ make clean        # 清理构建
+$ make diagnose     # 诊断问题
 ```
 
 ### 🧪 基本功能测试
@@ -130,14 +132,16 @@ tiny-torch/
 git clone https://github.com/nash635/tiny-torch.git
 cd tiny-torch
 
-# 安装依赖
-pip install -r requirements.txt
+# 完整安装 (推荐)
+make install
 
-# 构建项目
+# 或者分步安装
+pip install -r requirements.txt
 make build
+pip install -e .
 
 # 验证安装
-python verify_phase1_1.py
+python test/verify_phase1_1.py
 ```
 
 ### 当前可用功能
@@ -161,33 +165,53 @@ except NotImplementedError:
     print("✅ 张量接口已就位，等待Phase 1.2实现")
 ```
 
-## �� 测试和验证
+## 📊 测试和验证
 
+### 快速验证
 ```bash
-# 运行所有测试
+# 完整测试套件（推荐）
 make test
 
-# 运行特定测试
-python -m pytest test/test_cuda.py -v
+# 基础功能验证
+python -c "import torch; print('✅ 导入成功')"
 
-# 验证构建状态
-python verify_phase1_1.py
-
-# C++测试
-cd build_cmake && make test
+# 构建诊断
+make diagnose
 ```
 
-### 测试覆盖
-- **构建系统**: 100% (CMake + Python扩展)
-- **CUDA支持**: 95% (编译、运行时、设备管理)
-- **基础架构**: 90% (模块导入、错误处理)
+### 详细测试
+```bash
+# Python测试套件
+python -m pytest test/ -v
 
-## 📊 性能目标
+# CUDA功能测试
+python test/test_cuda.py --env
 
-基于当前硬件配置(Tesla P100):
-- **理论加速**: 10x+ CPU vs GPU
-- **内存带宽**: 732 GB/s
-- **计算能力**: 9.3 TFLOPS (FP32)
+# C++单元测试
+cd build/cmake && ./test/cpp/tiny_torch_cpp_tests
+
+# 验证Phase 1.1完成度
+python test/verify_phase1_1.py
+```
+
+### 测试覆盖率
+- **🏗️ 构建系统**: 100% (CMake + Ninja + setuptools)
+- **🐍 Python集成**: 95% (模块导入、错误处理、API)  
+- **⚡ CUDA支持**: 90% (编译、运行时、设备管理)
+- **🧪 基础架构**: 95% (项目结构、依赖管理)
+
+### 故障排除
+```bash
+# 构建问题诊断
+python diagnose_build.py
+
+# 环境检查
+python tools/check_env.py
+
+# 重新安装
+make clean && make install
+```
+
 
 ## 🎓 学习价值
 
@@ -220,10 +244,82 @@ cd build_cmake && make test
 
 ## 📄 许可证
 
-本项目采用BSD 3-Clause许可证，与PyTorch保持一致。详见 [LICENSE](LICENSE) 文件。
+本项目采用 **Apache License 2.0**，确保开源友好和商业兼容。
+
+### 许可证特点
+- ✅ **开源友好**：允许自由使用、修改和分发
+- ✅ **商业兼容**：可用于商业项目，包括专利保护
+- ✅ **学术研究**：适合教育和研究用途
+- ✅ **现代标准**：广泛采用的现代开源许可证
+
+### 相关文件
+- 📜 [LICENSE](LICENSE) - 完整许可证文本
+- 📋 [CONTRIBUTING.md](CONTRIBUTING.md) - 贡献指南
+- 📝 [CHANGELOG.md](CHANGELOG.md) - 版本更新记录
+
+### 使用声明
+在使用本项目时，请保留版权声明和许可证信息。详细条款请参阅 [LICENSE](LICENSE) 文件。
+
+> **注意**: pyproject.toml 中的许可证声明将在下个版本中更新以保持一致性。
 
 ---
 
 **🚀 开始您的深度学习框架探索之旅！**
 
 通过实现Tiny-Torch，获得对现代深度学习框架底层机制的深刻理解。
+
+## 🛠️ 构建命令参考
+
+### 基本命令
+
+| 命令 | 功能 | 适用场景 | 执行内容 |
+|------|------|----------|----------|
+| **`make install`** | 🏗️ **完整安装** | 生产环境、首次安装 | 清理+依赖+编译+安装 |
+| **`make build`** | 🔨 **仅编译** | 开发调试、快速测试 | 编译C++扩展到源码目录 |
+| **`make test`** | ✅ **运行测试** | 验证功能 | 安装+执行测试套件 |
+| **`make clean`** | 🧹 **清理** | 解决构建问题 | 删除所有构建产物 |
+| **`make diagnose`** | 🔍 **诊断** | 排查构建问题 | 分析环境和构建状态 |
+
+### 推荐工作流
+
+#### 首次安装 🆕
+```bash
+make install          # 一键完整安装
+make test            # 验证功能
+```
+
+#### 日常开发 🔄  
+```bash
+make build           # 快速编译测试
+# 修改代码...
+make build           # 重新编译
+make test            # 验证修改
+```
+
+#### 遇到问题 🚨
+```bash
+make diagnose        # 分析问题
+make clean           # 清理环境
+make install         # 重新安装
+```
+
+#### 高级选项 ⚙️
+```bash
+# 使用环境变量控制构建
+DEBUG=1 make install         # Debug模式
+WITH_CUDA=0 make install     # 禁用CUDA
+USE_NINJA=1 make install     # 强制使用Ninja
+VERBOSE=1 make install       # 详细输出
+
+# 使用专用安装脚本
+./install_tiny_torch.sh      # 自动化安装脚本
+```
+
+### 构建产物说明
+
+| 产物 | 位置 | 说明 |
+|------|------|------|
+| **C++静态库** | `build/cmake/libtiny_torch_cpp.a` | 编译后的C++核心库 |
+| **Python扩展** | `torch/_C.cpython-*.so` | Python可导入的C++扩展 |
+| **CUDA内核** | `build/cmake/*.cu.o` | 编译后的CUDA对象文件 |
+| **测试可执行文件** | `build/cmake/test/cpp/tiny_torch_cpp_tests` | C++测试程序 |
