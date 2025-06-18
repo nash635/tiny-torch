@@ -13,6 +13,7 @@ from setuptools import setup, Extension, find_packages
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from pybind11 import get_cmake_dir
 import pybind11
+import shutil
 
 # Project metadata
 PACKAGE_NAME = "tiny-torch"
@@ -29,6 +30,8 @@ WITH_MKL = os.getenv("WITH_MKL", "0") == "1"
 WITH_OPENMP = os.getenv("WITH_OPENMP", "1") == "1"
 VERBOSE = os.getenv("VERBOSE", "0") == "1"
 
+# Ninja will be set after compatibility test
+
 # Paths
 ROOT_DIR = Path(__file__).parent.absolute()
 CSRC_DIR = ROOT_DIR / "csrc"
@@ -44,31 +47,11 @@ def check_env():
     print(f"WITH_MKL: {WITH_MKL}")
     print(f"WITH_OPENMP: {WITH_OPENMP}")
     print(f"DEBUG: {DEBUG}")
+    print(f"USE_NINJA: {USE_NINJA}")
     print("=====================================")
 
-def get_cuda_version():
-    """获取CUDA版本"""
-    try:
-        result = subprocess.run(
-            ["nvcc", "--version"], 
-            capture_output=True, 
-            text=True, 
-            check=True
-        )
-        for line in result.stdout.split('\n'):
-            if 'release' in line:
-                version = line.split('release')[1].split(',')[0].strip()
-                return version
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
-    return None
-
-def get_extensions():
-    """构建扩展模块"""
-    global WITH_CUDA  # Declare as global to avoid UnboundLocalError
-    extensions = []
-    
-    # 源文件
+def get_sources():
+    """获取所有C++源文件列表"""
     sources = [
         # Python API bindings
         "csrc/api/src/python_bindings.cpp",
@@ -99,6 +82,220 @@ def get_extensions():
         "csrc/autograd/variable.cpp",
         "csrc/autograd/functions/basic_ops.cpp",
     ]
+    
+    if WITH_CUDA:
+        cuda_sources = [
+            "csrc/aten/src/ATen/cuda/CUDAContext.cu",
+            "csrc/aten/src/ATen/native/cuda/BinaryOps.cu",
+            "csrc/aten/src/ATen/native/cuda/UnaryOps.cu",
+            "csrc/aten/src/ATen/native/cuda/LinearAlgebra.cu",
+            "csrc/aten/src/ATen/native/cuda/Activation.cu",
+            "csrc/aten/src/ATen/native/cuda/Reduction.cu",
+        ]
+        sources.extend(cuda_sources)
+    
+    return sources
+
+def test_ninja_compatibility():
+    """测试Ninja是否真正可用"""
+    if not shutil.which("ninja"):
+        return False
+        
+    try:
+        # 测试ninja版本命令
+        result = subprocess.run(
+            ["ninja", "--version"], 
+            capture_output=True, 
+            text=True, 
+            check=True,
+            timeout=5
+        )
+        version = result.stdout.strip()
+        if VERBOSE:
+            print(f"Ninja version: {version}")
+        return True
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+def should_use_ninja():
+    """智能判断是否应该使用Ninja"""
+    # 检查环境变量设置
+    if os.getenv("USE_NINJA", "1") == "0":
+        return False
+        
+    # 检查Ninja兼容性
+    if not test_ninja_compatibility():
+        if VERBOSE:
+            print("Ninja compatibility test failed, falling back to Make")
+        return False
+        
+    return True
+
+# 更新USE_NINJA的设置
+USE_NINJA = should_use_ninja()
+
+def use_cmake_build():
+    """检查是否应该使用CMake构建 (当项目变复杂时)"""
+    # 当源文件数量超过阈值时，使用CMake+ninja构建
+    sources = get_sources()
+    return len(sources) > 20 or WITH_CUDA
+
+def cmake_build():
+    """使用CMake+ninja构建"""
+    print("Using CMake+ninja build system...")
+    
+    # 创建构建目录
+    cmake_build_dir = BUILD_DIR / "cmake"
+    cmake_build_dir.mkdir(parents=True, exist_ok=True)
+    
+    # CMake配置命令
+    cmake_args = [
+        f"-DCMAKE_BUILD_TYPE={'Debug' if DEBUG else 'Release'}",
+        f"-DWITH_CUDA={'ON' if WITH_CUDA else 'OFF'}",
+        f"-DWITH_MKL={'ON' if WITH_MKL else 'OFF'}",
+        f"-DWITH_OPENMP={'ON' if WITH_OPENMP else 'OFF'}",
+        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/torch",
+    ]
+    
+    # 使用ninja如果可用
+    if USE_NINJA:
+        cmake_args.append("-GNinja")
+        print("Using Ninja generator for faster builds")
+    
+    # 运行CMake配置
+    print(f"Running CMake configure in {cmake_build_dir}")
+    try:
+        result = subprocess.run([
+            "cmake", str(ROOT_DIR), *cmake_args
+        ], cwd=cmake_build_dir, capture_output=True, text=True, check=True)
+        print("✅ CMake configure successful")
+        if VERBOSE:
+            print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ CMake configure failed: {e}")
+        if e.stderr:
+            print("Error output:", e.stderr)
+        if e.stdout:
+            print("Output:", e.stdout)
+        return False
+    
+    # 运行构建
+    print("Running build...")
+    try:
+        if USE_NINJA:
+            build_cmd = ["ninja"]
+            if VERBOSE:
+                build_cmd.append("-v")
+        else:
+            build_cmd = ["make", "-j"]
+            if VERBOSE:
+                build_cmd.append("VERBOSE=1")
+                
+        result = subprocess.run(build_cmd, cwd=cmake_build_dir, capture_output=True, text=True, check=True)
+        print("✅ Build successful")
+        if VERBOSE:
+            print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Build failed: {e}")
+        if e.stderr:
+            print("Error output:", e.stderr)
+        if e.stdout:
+            print("Output:", e.stdout)
+        
+        # 如果Ninja失败，尝试降级到Make
+        if USE_NINJA:
+            print("🔄 Ninja build failed, trying fallback to Make...")
+            try:
+                # 重新配置使用Make
+                cmake_args_make = [arg for arg in cmake_args if not arg.startswith("-GNinja")]
+                subprocess.run([
+                    "cmake", str(ROOT_DIR), *cmake_args_make
+                ], cwd=cmake_build_dir, check=True)
+                
+                # 用Make构建
+                subprocess.run(["make", "-j"], cwd=cmake_build_dir, check=True)
+                print("✅ Make fallback build successful")
+            except subprocess.CalledProcessError as fallback_e:
+                print(f"❌ Make fallback also failed: {fallback_e}")
+                return False
+        else:
+            return False
+    
+    print("CMake build completed successfully!")
+    return True
+
+def get_cuda_version():
+    """获取CUDA版本"""
+    try:
+        result = subprocess.run(
+            ["nvcc", "--version"], 
+            capture_output=True, 
+            text=True, 
+            check=True
+        )
+        for line in result.stdout.split('\n'):
+            if 'release' in line:
+                version = line.split('release')[1].split(',')[0].strip()
+                return version
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+    return None
+
+def use_cmake_build():
+    """检查是否应该使用CMake构建 (当项目变复杂时)"""
+    # 当源文件数量超过阈值时，使用CMake+ninja构建
+    sources = get_sources()
+    return len(sources) > 20 or WITH_CUDA
+
+def cmake_build():
+    """使用CMake+ninja构建"""
+    print("Using CMake+ninja build system...")
+    
+    # 创建构建目录
+    cmake_build_dir = BUILD_DIR / "cmake"
+    cmake_build_dir.mkdir(parents=True, exist_ok=True)
+    
+    # CMake配置命令
+    cmake_args = [
+        f"-DCMAKE_BUILD_TYPE={'Debug' if DEBUG else 'Release'}",
+        f"-DWITH_CUDA={'ON' if WITH_CUDA else 'OFF'}",
+        f"-DWITH_MKL={'ON' if WITH_MKL else 'OFF'}",
+        f"-DWITH_OPENMP={'ON' if WITH_OPENMP else 'OFF'}",
+        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/torch",
+    ]
+    
+    # 使用ninja如果可用
+    if USE_NINJA:
+        cmake_args.append("-GNinja")
+        print("Using Ninja generator for faster builds")
+    
+    # 运行CMake配置
+    subprocess.run([
+        "cmake", str(ROOT_DIR), *cmake_args
+    ], cwd=cmake_build_dir, check=True)
+    
+    # 运行构建
+    if USE_NINJA:
+        subprocess.run(["ninja"], cwd=cmake_build_dir, check=True)
+    else:
+        subprocess.run(["make", "-j"], cwd=cmake_build_dir, check=True)
+    
+    print("CMake build completed successfully!")
+
+def get_extensions():
+    """获取扩展模块配置"""
+    global WITH_CUDA  # Declare as global to avoid UnboundLocalError
+    extensions = []
+    
+    # 检查是否应该使用CMake构建
+    if use_cmake_build():
+        print("Complex project detected, using CMake+ninja build system")
+        # 对于复杂项目，我们仍然返回setuptools扩展，但主要工作由CMake完成
+        # 这是一个过渡方案，确保setuptools仍能正确处理生成的库
+        pass
+    
+    # 获取源文件列表
+    sources = get_sources()
     
     # CUDA源文件 - 暂时禁用以使用CMake构建CUDA代码
     # TODO: 在Phase 1.2中实现CUDA支持的Python绑定
@@ -250,38 +447,42 @@ class CustomBuildExt(build_ext):
 if __name__ == "__main__":
     check_env()
     
-    setup(
-        name=PACKAGE_NAME,
-        version=VERSION,
-        description=DESCRIPTION,
-        long_description=get_long_description(),
-        long_description_content_type="text/markdown",
-        author=AUTHOR,
-        author_email=EMAIL,
-        url=URL,
-        
-        packages=find_packages(exclude=["test*", "benchmarks*"]),
-        ext_modules=get_extensions(),
-        cmdclass={"build_ext": CustomBuildExt},
-        
-        install_requires=get_requirements(),
-        python_requires=">=3.8",
-        
-        classifiers=[
-            "Development Status :: 3 - Alpha",
-            "Intended Audience :: Developers",
-            "Intended Audience :: Science/Research",
-            "License :: OSI Approved :: BSD License",
-            "Operating System :: POSIX :: Linux",
-            "Operating System :: MacOS :: MacOS X",
-            "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.8",
-            "Programming Language :: Python :: 3.9",
-            "Programming Language :: Python :: 3.10",
-            "Programming Language :: Python :: 3.11",
-            "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        ],
-        
-        zip_safe=False,
-        include_package_data=True,
-    )
+    # 如果源文件较多或需要CUDA支持，使用CMake构建
+    if use_cmake_build():
+        cmake_build()
+    else:
+        setup(
+            name=PACKAGE_NAME,
+            version=VERSION,
+            description=DESCRIPTION,
+            long_description=get_long_description(),
+            long_description_content_type="text/markdown",
+            author=AUTHOR,
+            author_email=EMAIL,
+            url=URL,
+            
+            packages=find_packages(exclude=["test*", "benchmarks*"]),
+            ext_modules=get_extensions(),
+            cmdclass={"build_ext": CustomBuildExt},
+            
+            install_requires=get_requirements(),
+            python_requires=">=3.8",
+            
+            classifiers=[
+                "Development Status :: 3 - Alpha",
+                "Intended Audience :: Developers",
+                "Intended Audience :: Science/Research",
+                "License :: OSI Approved :: BSD License",
+                "Operating System :: POSIX :: Linux",
+                "Operating System :: MacOS :: MacOS X",
+                "Programming Language :: Python :: 3",
+                "Programming Language :: Python :: 3.8",
+                "Programming Language :: Python :: 3.9",
+                "Programming Language :: Python :: 3.10",
+                "Programming Language :: Python :: 3.11",
+                "Topic :: Scientific/Engineering :: Artificial Intelligence",
+            ],
+            
+            zip_safe=False,
+            include_package_data=True,
+        )
