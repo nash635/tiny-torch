@@ -1,0 +1,68 @@
+# CPU-only Docker environment for development without GPU
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONPATH=/workspace:$PYTHONPATH
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    cmake \
+    ninja-build \
+    git \
+    wget \
+    curl \
+    vim \
+    htop \
+    tree \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create symbolic link for python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# Upgrade pip
+RUN python -m pip install --upgrade pip
+
+# Install PyTorch 2.7.1 CPU version
+RUN pip3 install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cpu
+
+# Install additional Python dependencies
+RUN pip3 install \
+    numpy>=1.19.0 \
+    typing-extensions>=3.7.0 \
+    pybind11[global]>=2.10.0 \
+    setuptools>=61.0 \
+    wheel \
+    pytest>=6.0.0 \
+    pytest-cov>=2.10.0 \
+    pytest-xdist>=2.0.0 \
+    black>=21.0.0 \
+    flake8>=3.8.0 \
+    mypy>=0.900 \
+    pre-commit>=2.15.0 \
+    isort>=5.9.0 \
+    jupyter \
+    ipython
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy project files
+COPY . .
+
+# Create development user
+RUN groupadd -r tinytorch && useradd -r -g tinytorch -m tinytorch
+RUN chown -R tinytorch:tinytorch /workspace
+
+# Switch to development user
+USER tinytorch
+
+# Expose Jupyter port
+EXPOSE 8888
+
+# Default command
+CMD ["/bin/bash"]

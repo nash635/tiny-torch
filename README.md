@@ -2,7 +2,7 @@
 
 ![Tiny-Torch](https://img.shields.io/badge/Tiny--Torch-v0.1.0-blue.svg)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
-![CUDA](https://img.shields.io/badge/CUDA-11.0%2B-green.svg)
+![CUDA](https://img.shields.io/badge/CUDA-12.9%2B-green.svg)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-orange.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
 ![Phase](https://img.shields.io/badge/Phase-1.1%20Complete-success.svg)
