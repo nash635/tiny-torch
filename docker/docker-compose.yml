@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  tiny-torch-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: tiny-torch:dev
+    container_name: tiny-torch-dev
+    volumes:
+      - ..:/workspace
+      - tiny-torch-data:/data
+      - ~/.gitconfig:/home/tinytorch/.gitconfig:ro
+      - ~/.ssh:/home/tinytorch/.ssh:ro
+    environment:
+      - CUDA_VISIBLE_DEVICES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    ports:
+      - "8888:8888"  # Jupyter
+      - "6006:6006"  # TensorBoard
+    stdin_open: true
+    tty: true
+    runtime: nvidia  # Requires nvidia-container-runtime
+    working_dir: /workspace
+    
+  # CPU-only development environment (for servers without GPU)
+  tiny-torch-cpu:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.cpu
+    image: tiny-torch:cpu
+    container_name: tiny-torch-cpu
+    volumes:
+      - ..:/workspace
+      - tiny-torch-data:/data
+      - ~/.gitconfig:/home/tinytorch/.gitconfig:ro
+      - ~/.ssh:/home/tinytorch/.ssh:ro
+    ports:
+      - "8888:8888"  # Jupyter
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+
+volumes:
+  tiny-torch-data:
