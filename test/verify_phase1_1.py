@@ -41,11 +41,10 @@ def check_files():
         # 文档
         "LICENSE": "许可证文件",
         "README.md": "项目说明文档",
-        "CONTRIBUTING.md": "贡献指南",
         "CHANGELOG.md": "更新日志",
         
         # 脚本和工具
-        "scripts/build.sh": "构建脚本",
+        "tools/build.sh": "构建脚本",
         "tools/setup_helpers/env.py": "环境检查工具",
         "tools/check_env.py": "独立环境检查脚本",
         
@@ -88,9 +87,6 @@ def check_directories():
         "torch/_C": "C扩展绑定目录",
         "test/cpp": "C++测试目录",
         "benchmarks/cpp": "C++性能测试",
-        "docs/design": "设计文档",
-        "examples": "示例代码",
-        "tools/build": "构建工具",
     }
     
     missing_dirs = []

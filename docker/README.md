@@ -20,9 +20,9 @@
 ### 2. 启动开发环境
 
 ```bash
-# 使用开发助手脚本（推荐）
-./docker/dev.sh dev-cpu     # 启动CPU开发环境
-./docker/dev.sh dev-gpu     # 启动GPU开发环境
+# 使用统一的build.sh脚本（推荐）
+./docker/build.sh dev-cpu     # 启动CPU开发环境
+./docker/build.sh dev-gpu     # 启动GPU开发环境
 
 # 或直接使用docker-compose
 docker-compose run --rm tiny-torch-cpu
@@ -33,11 +33,11 @@ docker-compose run --rm tiny-torch-dev
 
 ```bash
 # 测试Docker环境
-./docker/test.sh
+./docker/build.sh test all
 
 # 在容器中构建和测试项目
-./docker/dev.sh build
-./docker/dev.sh test
+./docker/build.sh project-build
+./docker/build.sh project-test
 ```
 
 ## 📦 环境配置
@@ -79,7 +79,7 @@ docker-compose run --rm tiny-torch-dev
 
 ```bash
 # 启动开发环境
-./docker/dev.sh dev-cpu
+./docker/build.sh dev-cpu
 
 # 在容器内
 cd /workspace
@@ -92,8 +92,8 @@ python -c "import torch; print(torch.__version__)"
 
 ```bash
 # 启动Jupyter Notebook
-./docker/dev.sh jupyter-cpu    # CPU版本
-./docker/dev.sh jupyter-gpu    # GPU版本
+./docker/build.sh jupyter-cpu    # CPU版本
+./docker/build.sh jupyter-gpu    # GPU版本
 
 # 访问 http://localhost:8888
 ```
@@ -102,7 +102,7 @@ python -c "import torch; print(torch.__version__)"
 
 ```bash
 # 进入容器Shell
-./docker/dev.sh shell
+./docker/build.sh shell
 
 # 在容器内使用开发工具
 pytest test/                  # 运行测试
@@ -117,17 +117,17 @@ mypy torch/                  # 类型检查
 1. **构建Docker镜像**:
    ```bash
    cd /path/to/tiny-torch
-   ./docker/build.sh all
+   ./docker/build.sh build all
    ```
 
 2. **验证构建**:
    ```bash
-   ./docker/test.sh
+   ./docker/build.sh test all
    ```
 
 3. **启动开发**:
    ```bash
-   ./docker/dev.sh dev-cpu
+   ./docker/build.sh dev-cpu
    ```
 
 ### 手动测试步骤
@@ -226,34 +226,37 @@ else:
 "
 ```
 
-## 🔧 开发助手脚本
+## 🔧 统一管理脚本
 
-### `./docker/dev.sh` - 开发助手
-
-```bash
-./docker/dev.sh dev-cpu         # 启动CPU开发环境
-./docker/dev.sh dev-gpu         # 启动GPU开发环境
-./docker/dev.sh jupyter-cpu     # 启动Jupyter (CPU)
-./docker/dev.sh jupyter-gpu     # 启动Jupyter (GPU)
-./docker/dev.sh build           # 构建项目
-./docker/dev.sh test            # 运行测试
-./docker/dev.sh shell           # 打开容器Shell
-./docker/dev.sh clean           # 清理容器和镜像
-./docker/dev.sh logs            # 查看容器日志
-```
-
-### `./docker/build.sh` - 构建脚本
+### `./docker/build.sh` - 统一管理脚本
 
 ```bash
-./docker/build.sh all           # 构建所有镜像
-./docker/build.sh cpu           # 构建CPU镜像
-./docker/build.sh gpu           # 构建GPU镜像
-```
+# 构建命令
+./docker/build.sh build [gpu|cpu|all]     # 构建Docker镜像
 
-### `./docker/test.sh` - 测试脚本
+# 开发命令
+./docker/build.sh dev-cpu                 # 启动CPU开发环境
+./docker/build.sh dev-gpu                 # 启动GPU开发环境
+./docker/build.sh jupyter-cpu             # 启动Jupyter (CPU)
+./docker/build.sh jupyter-gpu             # 启动Jupyter (GPU)
+./docker/build.sh shell [cpu|gpu]         # 打开容器Shell
 
-```bash
-./docker/test.sh                # 运行所有环境测试
+# 项目命令
+./docker/build.sh project-build           # 构建项目
+./docker/build.sh project-test            # 运行项目测试
+
+# 测试命令
+./docker/build.sh test [cpu|gpu|all]      # 测试环境
+./docker/build.sh test-python             # 测试Python环境
+./docker/build.sh test-pytorch            # 测试PyTorch安装
+./docker/build.sh test-cuda               # 测试CUDA支持
+./docker/build.sh test-project            # 测试项目功能
+
+# 实用命令
+./docker/build.sh clean                   # 清理容器和镜像
+./docker/build.sh logs [cpu|gpu]          # 查看容器日志
+./docker/build.sh status                  # 显示状态
+./docker/build.sh help                    # 显示帮助
 ```
 
 ## 🐛 故障排除
@@ -272,8 +275,8 @@ else:
 2. **构建失败**
    ```bash
    # 清理并重新构建
-   ./docker/dev.sh clean
-   ./docker/build.sh all
+   ./docker/build.sh clean
+   ./docker/build.sh build all
    ```
 
 3. **权限问题**

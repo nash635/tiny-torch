@@ -1,7 +1,7 @@
 # Tiny-Torch Docker Development Environment
-# Based on NVIDIA CUDA 12.9 with PyTorch 2.7 support
+# Based on NVIDIA CUDA 12.8 with PyTorch GPU support
 
-FROM crpi-rxpfp3shzt1yww56.cn-hangzhou.personal.cr.aliyuncs.com/tiny-torch/nvidia:12.9.1-devel-ubuntu22.04
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -29,29 +29,25 @@ RUN apt-get update && apt-get install -y \
 # Create symbolic link for python
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# Upgrade pip
-RUN python -m pip install --upgrade pip
+# Skip pip upgrade due to Ubuntu 24.04 externally managed environment
+# Use system pip directly
 
-# Install PyTorch 2.7.1 with CUDA 12.9 support
-RUN pip3 install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu121
+# Install PyTorch with CUDA 12.8 support (matching base image)
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --break-system-packages
 
-# Install additional Python dependencies
+# Install additional Python dependencies from requirements files
+COPY requirements.txt requirements-dev.txt ./
+RUN pip3 install -r requirements.txt -r requirements-dev.txt --break-system-packages
+
+# Install additional development tools
 RUN pip3 install \
-    numpy>=1.19.0 \
-    typing-extensions>=3.7.0 \
-    pybind11[global]>=2.10.0 \
-    setuptools>=61.0 \
-    wheel \
-    pytest>=6.0.0 \
-    pytest-cov>=2.10.0 \
-    pytest-xdist>=2.0.0 \
-    black>=21.0.0 \
-    flake8>=3.8.0 \
-    mypy>=0.900 \
-    pre-commit>=2.15.0 \
-    isort>=5.9.0 \
     jupyter \
-    ipython
+    ipython \
+    jupyterlab \
+    matplotlib \
+    seaborn \
+    pandas \
+    --break-system-packages
 
 # Set working directory
 WORKDIR /workspace
@@ -59,12 +55,11 @@ WORKDIR /workspace
 # Copy project files
 COPY . .
 
-# Create development user (optional, for better security)
-RUN groupadd -r tinytorch && useradd -r -g tinytorch -m tinytorch
-RUN chown -R tinytorch:tinytorch /workspace
-
-# Switch to development user
-USER tinytorch
+# Keep root user for development convenience
+# (Comment out user creation to use root)
+# RUN groupadd -r tinytorch && useradd -r -g tinytorch -m tinytorch
+# RUN chown -R tinytorch:tinytorch /workspace
+# USER tinytorch
 
 # Expose Jupyter port
 EXPOSE 8888

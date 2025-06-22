@@ -60,9 +60,16 @@ build:
 # 安装项目 (改进版本处理多个.egg-info目录问题)
 install: clean
 	@echo "Installing Tiny-Torch (with cleanup)..."
-	pip install -r requirements.txt
-	python setup.py build_ext --inplace
-	pip install -e . --no-deps
+	@if [ -f /.dockerenv ] || [ -n "$(CONTAINER)" ]; then \
+		echo "Detected container environment, using --break-system-packages"; \
+		pip install -r requirements.txt --break-system-packages; \
+		python setup.py build_ext --inplace; \
+		pip install -e . --no-deps --break-system-packages; \
+	else \
+		pip install -r requirements.txt; \
+		python setup.py build_ext --inplace; \
+		pip install -e . --no-deps; \
+	fi
 
 # 完整安装 (使用专用脚本)
 install-full:

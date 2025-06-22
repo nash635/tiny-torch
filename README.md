@@ -144,6 +144,47 @@ pip install -e .
 python test/verify_phase1_1.py
 ```
 
+### Docker开发环境 (推荐)
+如果您想快速开始而不想配置复杂的环境，可以使用预构建的Docker镜像：
+
+```bash
+# 直接使用预构建镜像 (推荐)
+docker pull crpi-rxpfp3shzt1yww56.cn-hangzhou.personal.cr.aliyuncs.com/tiny-torch/tiny-torch-gpu:latest
+
+# 启动GPU开发环境
+docker run --gpus all -it --rm \
+  -v $(pwd):/workspace \
+  -p 8888:8888 \
+  crpi-rxpfp3shzt1yww56.cn-hangzhou.personal.cr.aliyuncs.com/tiny-torch/tiny-torch-gpu:latest
+
+# 在容器内构建和测试
+cd /workspace
+make install
+make test
+
+# 启动Jupyter开发环境
+jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+```
+
+**镜像特性**：
+- 🐳 基于 CUDA 12.8 + Ubuntu 24.04
+- 🔥 预装 PyTorch 2.7.1 + CUDA支持
+- 🛠️ 完整开发工具链 (CMake, Ninja, GCC, NVCC)
+- 📊 Jupyter + IPython + 数据科学工具
+- 📦 大小：~22GB，包含完整开发环境
+
+### 本地构建镜像 (可选)
+```bash
+# 构建本地镜像
+./docker/build.sh build gpu
+
+# 启动开发环境
+./docker/build.sh dev-gpu
+
+# 更多选项
+./docker/build.sh help
+```
+
 ### 当前可用功能
 ```python
 import torch
@@ -284,6 +325,15 @@ make clean && make install
 
 #### 首次安装 🆕
 ```bash
+# 本地环境
+make install          # 完整安装
+
+# 或使用Docker (推荐)
+docker pull crpi-rxpfp3shzt1yww56.cn-hangzhou.personal.cr.aliyuncs.com/tiny-torch/tiny-torch-gpu:latest
+docker run --gpus all -it --rm -v $(pwd):/workspace crpi-rxpfp3shzt1yww56.cn-hangzhou.personal.cr.aliyuncs.com/tiny-torch/tiny-torch-gpu:latest
+```
+
+#### 日常开发 🔄bash
 make install          # 一键完整安装
 make test            # 验证功能
 ```
