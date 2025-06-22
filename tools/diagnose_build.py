@@ -82,20 +82,33 @@ def main():
     # 3. Package dependencies
     print_subsection("3. Package Dependencies")
     
-    required_packages = ["setuptools", "wheel", "pybind11", "cmake", "ninja"]
-    for package in required_packages:
+    required_packages = {
+        "setuptools": "setuptools",
+        "wheel": "wheel", 
+        "pybind11": "pybind11",
+        "cmake": "cmake"
+    }
+    
+    for package, import_name in required_packages.items():
         try:
-            __import__(package)
+            __import__(import_name)
             print(f"✅ {package}: Available")
         except ImportError:
             print(f"❌ {package}: Missing")
+    
+    # Check ninja separately since it's a command-line tool, not a Python package
+    ninja_check = run_command("which ninja", "Check ninja availability", capture_output=True)
+    if ninja_check:
+        print(f"✅ ninja: Available")
+    else:
+        print(f"❌ ninja: Missing")
     
     # 4. Tools availability
     print_subsection("4. Build Tools")
     
     tools = {
-        "python": "Python interpreter",
-        "pip": "Python package installer", 
+        "python3": "Python interpreter",
+        "pip3": "Python package installer", 
         "cmake": "CMake build system",
         "ninja": "Ninja build tool",
         "make": "GNU Make",
@@ -106,7 +119,14 @@ def main():
     for tool, description in tools.items():
         result = run_command(f"which {tool}", f"Check {description}")
         if result:
-            version = run_command(f"{tool} --version 2>/dev/null | head -1", f"Get {tool} version")
+            if tool == "python3":
+                version = run_command(f"{tool} --version", f"Get {tool} version")
+            elif tool == "pip3":
+                version = run_command(f"{tool} --version", f"Get {tool} version")
+            elif tool == "ninja":
+                version = run_command(f"{tool} --version 2>/dev/null", f"Get {tool} version")
+            else:
+                version = run_command(f"{tool} --version 2>/dev/null | head -1", f"Get {tool} version")
             if version:
                 print(f"   Version: {version}")
     
@@ -144,18 +164,18 @@ def main():
     
     print("\n🔧 Recommended installation sequence:")
     print("   1. rm -rf build/ dist/ *.egg-info/")
-    print("   2. pip install -r requirements.txt")
-    print("   3. python setup.py build_ext --inplace")
-    print("   4. pip install -e . --no-deps")
+    print("   2. pip3 install -r requirements.txt")
+    print("   3. python3 setup.py build_ext --inplace")
+    print("   4. pip3 install -e . --no-deps")
     
     # 7. Test simple operations
     print_subsection("7. Basic Functionality Test")
     
     # Test setup.py syntax
-    syntax_ok = run_command("python -m py_compile setup.py", "Check setup.py syntax")
+    syntax_ok = run_command("python3 -m py_compile setup.py", "Check setup.py syntax")
     
     # Test import
-    import_ok = run_command("python -c 'import setuptools; print(setuptools.__version__)'", "Test setuptools import")
+    import_ok = run_command("python3 -c 'import setuptools; print(setuptools.__version__)'", "Test setuptools import")
     
     print_section("Diagnostic Complete")
     

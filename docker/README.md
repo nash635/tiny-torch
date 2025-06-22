@@ -162,7 +162,7 @@ docker-compose run --rm tiny-torch-cpu ls -la /workspace
 # 2. 测试构建系统
 docker-compose run --rm tiny-torch-cpu bash -c "
 cd /workspace
-python diagnose_build.py
+python3 tools/diagnose_build.py
 "
 
 # 3. 尝试构建项目

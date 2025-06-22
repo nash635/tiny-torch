@@ -140,7 +140,7 @@ pytest test/test_tensor.py -v
 python test/verify_phase1_1.py
 
 # 构建系统诊断
-python diagnose_build.py
+python tools/diagnose_build.py
 ```
 
 ## 🚀 开发工作流
@@ -208,10 +208,10 @@ python benchmarks/compare_with_pytorch.py
 
 ```bash
 # 综合诊断
-python diagnose_build.py
+python3 tools/diagnose_build.py
 
 # 环境检查
-python tools/check_env.py
+python3 tools/check_env.py
 
 # 构建状态检查
 make check-env

@@ -244,10 +244,10 @@ python test/verify_phase1_1.py
 ### 故障排除
 ```bash
 # 构建问题诊断
-python diagnose_build.py
+python3 tools/diagnose_build.py
 
 # 环境检查
-python tools/check_env.py
+python3 tools/check_env.py
 
 # 重新安装
 make clean && make install
@@ -362,7 +362,7 @@ USE_NINJA=1 make install     # 强制使用Ninja
 VERBOSE=1 make install       # 详细输出
 
 # 使用专用安装脚本
-./install_tiny_torch.sh      # 自动化安装脚本
+./tools/install_tiny_torch.sh      # 自动化安装脚本
 ```
 
 ### 构建产物说明

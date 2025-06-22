@@ -50,12 +50,12 @@ clean:
 # 诊断构建问题
 diagnose:
 	@echo "Running build diagnostics..."
-	python diagnose_build.py
+	python3 tools/diagnose_build.py
 
 # 构建项目
 build:
 	@echo "Building Tiny-Torch..."
-	python setup.py build_ext --inplace
+	python3 setup.py build_ext --inplace
 
 # 安装项目 (改进版本处理多个.egg-info目录问题)
 install: clean
@@ -74,8 +74,8 @@ install: clean
 # 完整安装 (使用专用脚本)
 install-full:
 	@echo "Full installation with diagnostics..."
-	chmod +x install_tiny_torch.sh
-	./install_tiny_torch.sh
+	chmod +x tools/install_tiny_torch.sh
+	./tools/install_tiny_torch.sh
 
 # 运行测试
 test: install

@@ -544,8 +544,8 @@ find . -name '*.cpp' -o -name '*.cu' | head -10
     print_status "Testing build system..."
     local cmd2="docker run --gpus all --rm -v \"$(pwd)\":/workspace tiny-torch:latest bash -c \"
 cd /workspace
-if [ -f 'diagnose_build.py' ]; then
-    python diagnose_build.py
+if [ -f 'tools/diagnose_build.py' ]; then
+    python3 tools/diagnose_build.py
 fi
 \""
     execute_cmd "$cmd2"
