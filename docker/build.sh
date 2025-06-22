@@ -85,6 +85,7 @@ show_usage() {
     echo "  $0 test all             # Test all environments"
     echo "  $0 project-build        # Build project in container"
 }
+
 # Check if docker is installed
 check_docker() {
     if ! command -v docker &> /dev/null; then
@@ -119,6 +120,7 @@ check_docker_compose() {
     fi
     print_success "docker-compose is available"
 }
+
 # Build Docker image
 build_image() {
     local image_type=$1
