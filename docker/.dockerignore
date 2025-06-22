@@ -1,0 +1,49 @@
+# Docker ignore file for tiny-torch
+# Build artifacts
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.so
+*.a
+*.o
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/_build/
+*.md
+
+# Logs
+*.log
+logs/
+
+# Data
+data/
+datasets/
+checkpoints/
+models/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python virtual environments
+venv/
+env/
+.env
+
+# Docker
+.dockerignore
+docker/README.md
