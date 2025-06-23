@@ -279,7 +279,7 @@ endif()
 target_compile_definitions(_C PRIVATE VERSION_INFO=${PROJECT_VERSION})
 
 # Install targets
-install(TARGETS _C DESTINATION torch)
+install(TARGETS _C DESTINATION tiny_torch)
 
 # Tests
 if(BUILD_TESTS)

@@ -26,7 +26,7 @@ Phase 1.1 专注于建立完整的构建系统和开发基础设施，为后续�
 ## 📁 项目结构
 
 ```
-tiny-torch/
+tiny-tiny_torch/
 ├── CMakeLists.txt           # 主构建配置
 ├── setup.py                 # Python 扩展构建
 ├── Makefile                 # 便捷构建接口
@@ -39,7 +39,7 @@ tiny-torch/
 │   │       └── TH/         # 底层张量操作
 │   ├── autograd/           # 自动微分引擎
 │   └── api/                # Python 绑定层
-├── torch/                   # Python 包
+├── tiny_torch/                   # Python 包
 │   ├── __init__.py         # 主模块
 │   ├── autograd/           # 自动微分 Python 接口
 │   ├── cuda/               # CUDA 支持
@@ -167,7 +167,7 @@ make clean && make build
 ### 性能测试
 ```bash
 # 运行基准测试
-python benchmarks/compare_with_pytorch.py
+python benchmarks/compare_with_pytiny_torch.py
 ```
 
 ## 🔍 故障排除
@@ -201,7 +201,7 @@ python benchmarks/compare_with_pytorch.py
    make build
    
    # 检查库路径
-   ldd torch/_C*.so
+   ldd tiny_torch/_C*.so
    ```
 
 ### 诊断工具

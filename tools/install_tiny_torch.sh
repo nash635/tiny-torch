@@ -84,7 +84,7 @@ main() {
     
     # Verify installation
     print_status "Verifying installation..."
-    if python -c "import torch; print('✅ torch imported successfully')"; then
+    if python -c "import tiny_torch; print('✅ tiny_torch imported successfully')"; then
         print_success "Installation completed successfully!"
     else
         print_error "Installation verification failed"
@@ -93,9 +93,9 @@ main() {
     
     print_status "Running basic tests..."
     if python -c "
-import torch
-print(f'Tiny-Torch version: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
+import tiny_torch
+print(f'Tiny-Torch version: {tiny_torch.__version__}')
+print(f'CUDA available: {tiny_torch.cuda.is_available()}')
 print('✅ Basic functionality verified')
 "; then
         print_success "All tests passed!"
@@ -108,7 +108,7 @@ print('✅ Basic functionality verified')
     echo "Next steps:"
     echo "  • Run tests: make test"
     echo "  • Check diagnostics: make diagnose"
-    echo "  • Start development: python -c 'import torch'"
+    echo "  • Start development: python -c 'import tiny_torch'"
 }
 
 main "$@"

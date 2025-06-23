@@ -1,5 +1,5 @@
 """
-torch/autograd/__init__.py
+tiny_torch/autograd/__init__.py
 自动微分模块 (参考 pytorch/torch/autograd/__init__.py)
 """
 

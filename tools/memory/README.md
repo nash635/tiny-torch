@@ -159,7 +159,7 @@ def custom_oom_callback(device_id, prediction):
     if prediction.risk_level.value == "critical":
         # 执行紧急操作，如减少batch size
         print(f"Critical OOM risk on GPU {device_id}! Taking action...")
-        # torch.cuda.empty_cache()
+        # tiny_torch.cuda.empty_cache()
         # reduce_batch_size()
 
 detector = OOMDetector()
@@ -216,7 +216,7 @@ detector.start_monitoring()
 ### 显存优化策略
 1. **基于分析结果调整batch size**
 2. **使用gradient checkpointing减少峰值内存**
-3. **定期清理CUDA缓存**: `torch.cuda.empty_cache()`
+3. **定期清理CUDA缓存**: `tiny_torch.cuda.empty_cache()`
 4. **使用混合精度训练**: 减少内存使用
 5. **优化数据加载**: 避免数据预处理占用过多内存
 

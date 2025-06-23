@@ -347,19 +347,19 @@ test_cpu_environment() {
     # Test PyTorch installation
     print_status "Testing PyTorch installation..."
     local cmd2="docker run --rm tiny-torch:cpu python -c \"
-import torch
-print(f'PyTorch version: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
+import tiny_torch
+print(f'PyTorch version: {tiny_torch.__version__}')
+print(f'CUDA available: {tiny_torch.cuda.is_available()}')
 \""
     execute_cmd "$cmd2"
     
     # Test basic tensor operations
     print_status "Testing basic tensor operations..."
     local cmd3="docker run --rm tiny-torch:cpu python -c \"
-import torch
-x = torch.randn(3, 3)
-y = torch.randn(3, 3)
-z = torch.matmul(x, y)
+import tiny_torch
+x = tiny_torch.randn(3, 3)
+y = tiny_torch.randn(3, 3)
+z = tiny_torch.matmul(x, y)
 print(f'Matrix multiplication successful: {z.shape}')
 \""
     execute_cmd "$cmd3"
@@ -391,13 +391,13 @@ test_gpu_environment() {
     # Test PyTorch GPU support
     print_status "Testing PyTorch GPU support..."
     local cmd2="docker run --gpus all --rm tiny-torch:latest python -c \"
-import torch
-print(f'PyTorch version: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
-if torch.cuda.is_available():
-    print(f'GPU count: {torch.cuda.device_count()}')
-    print(f'Current GPU: {torch.cuda.current_device()}')
-    print(f'GPU name: {torch.cuda.get_device_name()}')
+import tiny_torch
+print(f'PyTorch version: {tiny_torch.__version__}')
+print(f'CUDA available: {tiny_torch.cuda.is_available()}')
+if tiny_torch.cuda.is_available():
+    print(f'GPU count: {tiny_torch.cuda.device_count()}')
+    print(f'Current GPU: {tiny_torch.cuda.current_device()}')
+    print(f'GPU name: {tiny_torch.cuda.get_device_name()}')
 else:
     print('No GPU available')
 \""
@@ -406,11 +406,11 @@ else:
     # Test GPU tensor operations
     print_status "Testing GPU tensor operations..."
     local cmd3="docker run --gpus all --rm tiny-torch:latest python -c \"
-import torch
-if torch.cuda.is_available():
-    x = torch.randn(100, 100).cuda()
-    y = torch.randn(100, 100).cuda()
-    z = torch.matmul(x, y)
+import tiny_torch
+if tiny_torch.cuda.is_available():
+    x = tiny_torch.randn(100, 100).cuda()
+    y = tiny_torch.randn(100, 100).cuda()
+    z = tiny_torch.matmul(x, y)
     print(f'GPU computation successful: {z.shape} on {z.device}')
 else:
     print('No GPU available for testing')
@@ -431,8 +431,8 @@ cmd_test_python() {
 import sys
 print(f'Python version: {sys.version}')
 print('Python path:', sys.path[:3])
-import torch
-print(f'PyTorch version: {torch.__version__}')
+import tiny_torch
+print(f'PyTorch version: {tiny_torch.__version__}')
 print('Available modules: torch, numpy, pytest, jupyter')
 \""
             execute_cmd "$cmd"
@@ -451,18 +451,18 @@ import sys
 if '/workspace' in sys.path:
     sys.path.remove('/workspace')
 
-import torch
-print(f'Standard PyTorch version: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
+import tiny_torch
+print(f'Standard PyTorch version: {tiny_torch.__version__}')
+print(f'CUDA available: {tiny_torch.cuda.is_available()}')
 
 # Test basic operations
-x = torch.randn(5, 3)
-y = torch.randn(3, 4)
-z = torch.mm(x, y)
+x = tiny_torch.randn(5, 3)
+y = tiny_torch.randn(3, 4)
+z = tiny_torch.mm(x, y)
 print(f'Matrix multiplication: {x.shape} x {y.shape} = {z.shape}')
 
 # Test autograd
-x = torch.randn(2, 2, requires_grad=True)
+x = tiny_torch.randn(2, 2, requires_grad=True)
 y = x.sum()
 y.backward()
 print(f'Autograd test: gradient shape {x.grad.shape}')
@@ -472,7 +472,7 @@ print('PyTorch functionality test passed!')
     if docker images | grep -q "tiny-torch:latest"; then
         local cmd1="docker run --gpus all --rm tiny-torch:latest python -c \"$test_script\""
         execute_cmd "$cmd1"
-    elif docker images | grep -q "tiny-torch.*cpu"; then
+    elif docker images | grep -q "tiny-tiny_torch.*cpu"; then
         local cmd2="docker run --rm tiny-torch:cpu python -c \"$test_script\""
         execute_cmd "$cmd2"
     else
@@ -496,21 +496,21 @@ cmd_test_cuda() {
     fi
     
     local cmd="docker run --gpus all --rm tiny-torch:latest python -c \"
-import torch
+import tiny_torch
 print('=== CUDA Environment Test ===')
-print(f'CUDA available: {torch.cuda.is_available()}')
-if torch.cuda.is_available():
-    print(f'CUDA version: {torch.version.cuda}')
-    print(f'GPU count: {torch.cuda.device_count()}')
-    for i in range(torch.cuda.device_count()):
-        print(f'GPU {i}: {torch.cuda.get_device_name(i)}')
-        print(f'  Memory: {torch.cuda.get_device_properties(i).total_memory / 1024**3:.1f} GB')
+print(f'CUDA available: {tiny_torch.cuda.is_available()}')
+if tiny_torch.cuda.is_available():
+    print(f'CUDA version: {tiny_torch.version.cuda}')
+    print(f'GPU count: {tiny_torch.cuda.device_count()}')
+    for i in range(tiny_torch.cuda.device_count()):
+        print(f'GPU {i}: {tiny_torch.cuda.get_device_name(i)}')
+        print(f'  Memory: {tiny_torch.cuda.get_device_properties(i).total_memory / 1024**3:.1f} GB')
     
     # Test GPU memory allocation
     print('Testing GPU memory allocation...')
-    x = torch.randn(1000, 1000).cuda()
+    x = tiny_torch.randn(1000, 1000).cuda()
     print(f'Allocated tensor on GPU: {x.device}')
-    print(f'Memory allocated: {torch.cuda.memory_allocated() / 1024**2:.1f} MB')
+    print(f'Memory allocated: {tiny_torch.cuda.memory_allocated() / 1024**2:.1f} MB')
     print('CUDA functionality test passed!')
 else:
     print('CUDA not available')

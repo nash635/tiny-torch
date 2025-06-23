@@ -49,11 +49,11 @@ def check_files():
         "tools/check_env.py": "独立环境检查脚本",
         
         # Python包结构
-        "torch/__init__.py": "主模块初始化",
-        "torch/nn/__init__.py": "神经网络模块",
-        "torch/optim/__init__.py": "优化器模块", 
-        "torch/autograd/__init__.py": "自动微分模块",
-        "torch/py.typed": "类型提示标记文件",
+        "tiny_torch/__init__.py": "主模块初始化",
+        "tiny_torch/nn/__init__.py": "神经网络模块",
+        "tiny_torch/optim/__init__.py": "优化器模块", 
+        "tiny_torch/autograd/__init__.py": "自动微分模块",
+        "tiny_torch/py.typed": "类型提示标记文件",
         
         # 测试
         "test/__init__.py": "测试包初始化",
@@ -83,8 +83,8 @@ def check_directories():
         "csrc/aten/src/ATen/native": "ATen CPU实现",
         "csrc/aten/src/ATen/cuda": "ATen CUDA实现",
         "csrc/autograd": "自动微分C++实现",
-        "torch/nn/modules": "神经网络模块",
-        "torch/_C": "C扩展绑定目录",
+        "tiny_torch/nn/modules": "神经网络模块",
+        "tiny_torch/_C": "C扩展绑定目录",
         "test/cpp": "C++测试目录",
         "benchmarks/cpp": "C++性能测试",
     }
@@ -152,22 +152,22 @@ def check_basic_functionality():
     
     try:
         # 检查能否导入torch
-        import torch
-        print(f"  ✅ torch import successful (v{torch.__version__})")
+        import tiny_torch
+        print(f"  ✅ torch import successful (v{tiny_torch.__version__})")
         
         # 检查子模块导入
-        import torch.nn
-        import torch.optim  
-        import torch.autograd
+        import tiny_torch.nn
+        import tiny_torch.optim  
+        import tiny_torch.autograd
         print(f"  ✅ All submodules import successfully")
         
         # 检查占位符函数
         try:
-            torch.tensor([1, 2, 3])
-            print(f"  ❌ torch.tensor should raise NotImplementedError")
+            tiny_torch.tensor([1, 2, 3])
+            print(f"  ❌ tiny_torch.tensor should raise NotImplementedError")
             return False
         except NotImplementedError:
-            print(f"  ✅ torch.tensor correctly raises NotImplementedError")
+            print(f"  ✅ tiny_torch.tensor correctly raises NotImplementedError")
         
         return True
         

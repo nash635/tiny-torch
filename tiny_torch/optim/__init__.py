@@ -1,5 +1,5 @@
 """
-torch/optim/__init__.py
+tiny_torch/optim/__init__.py
 优化器模块 (参考 pytorch/torch/optim/__init__.py)
 """
 

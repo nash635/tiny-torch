@@ -14,7 +14,7 @@ Tiny-Torch 是一个从零开始实现的深度学习框架，严格参考 [PyTo
 ### ✅ 已完成功能
 - ✅ **完整构建系统** - CMake + Python setuptools双重构建支持
 - ✅ **C++核心库** - 成功编译的静态库 (`libtiny_torch_cpp.a`)
-- ✅ **Python扩展** - 可导入的Python模块 (`torch._C`)
+- ✅ **Python扩展** - 可导入的Python模块 (`tiny_torch._C`)
 - ✅ **CUDA支持** - 6/6 CUDA源文件编译，GPU检测和管理
 - ✅ **测试框架** - C++和Python测试环境完整搭建
 - ✅ **开发工具链** - 代码格式化、CI/CD、预提交钩子配置
@@ -39,12 +39,12 @@ $ make diagnose     # 诊断问题
 
 ### 🧪 基本功能测试
 ```python
-import torch
-print(torch.__version__)  # 输出: 0.1.0
+import tiny_torch
+print(tiny_torch.__version__)  # 输出: 0.1.0
 
 # 张量接口已就位（Phase 1.2将实现具体功能）
 try:
-    torch.tensor([1, 2, 3])  # 正确抛出NotImplementedError
+    tiny_torch.tensor([1, 2, 3])  # 正确抛出NotImplementedError
 except NotImplementedError:
     print("✅ 张量接口结构正确，等待Phase 1.2实现")
 ```
@@ -85,7 +85,7 @@ tiny-torch/
 │   ├── aten/                  # 张量库 (参考pytorch/aten)
 │   ├── autograd/              # 自动微分引擎
 │   └── api/                   # Python C API绑定
-├── torch/                     # Python前端
+├── tiny_torch/                 # Python前端
 │   ├── nn/                    # 神经网络模块
 │   ├── optim/                 # 优化器
 │   ├── autograd/              # 自动微分接口
@@ -187,21 +187,21 @@ jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
 
 ### 当前可用功能
 ```python
-import torch
+import tiny_torch
 
 # 基础功能 (Phase 1.1)
-print(torch.__version__)              # 0.1.0
-print(torch.cuda.is_available())      # CUDA检测
-print(torch.cuda.device_count())      # GPU数量
+print(tiny_torch.__version__)              # 0.1.0
+print(tiny_torch.cuda.is_available())      # CUDA检测
+print(tiny_torch.cuda.device_count())      # GPU数量
 
 # 模块结构已就位
-import torch.nn
-import torch.optim  
-import torch.autograd
+import tiny_torch.nn
+import tiny_torch.optim  
+import tiny_torch.autograd
 
 # 张量接口框架 (Phase 1.2将实现具体功能)
 try:
-    tensor = torch.tensor([1, 2, 3])
+    tensor = tiny_torch.tensor([1, 2, 3])
 except NotImplementedError:
     print("✅ 张量接口已就位，等待Phase 1.2实现")
 ```
@@ -214,7 +214,7 @@ except NotImplementedError:
 make test
 
 # 基础功能验证
-python -c "import torch; print('✅ 导入成功')"
+python -c "import tiny_torch; print('✅ 导入成功')"
 
 # 构建诊断
 make diagnose
@@ -362,7 +362,7 @@ USE_NINJA=1 make install     # 强制使用Ninja
 VERBOSE=1 make install       # 详细输出
 
 # 使用专用安装脚本
-./tools/install_tiny_torch.sh      # 自动化安装脚本
+./tools/install_tiny_tiny_torch.sh      # 自动化安装脚本
 ```
 
 ### 构建产物说明

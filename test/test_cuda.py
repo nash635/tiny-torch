@@ -95,28 +95,28 @@ def run_functional_tests():
     
     results = {}
     
-    # 测试torch导入
-    print("🔍 测试torch模块导入...")
+    # 测试tiny_torch导入
+    print("🔍 测试tiny_torch模块导入...")
     try:
-        import torch
-        print(f"✅ 导入torch成功，版本: {torch.__version__}")
-        results['torch导入'] = True
+        import tiny_torch
+        print(f"✅ 导入tiny_torch成功，版本: {tiny_torch.__version__}")
+        results['tiny_torch导入'] = True
     except ImportError as e:
-        print(f"❌ 无法导入torch: {e}")
-        results['torch导入'] = False
+        print(f"❌ 无法导入tiny_torch: {e}")
+        results['tiny_torch导入'] = False
         return results
     
     # 测试CUDA模块
-    print("\n🔍 测试torch.cuda模块...")
+    print("\n🔍 测试tiny_torch.cuda模块...")
     try:
-        if hasattr(torch, 'cuda'):
-            print("✅ torch.cuda模块存在")
+        if hasattr(tiny_torch, 'cuda'):
+            print("✅ tiny_torch.cuda模块存在")
             
             # 检查基本函数
             functions = ['is_available', 'device_count', 'current_device', 'get_device_name']
             all_exist = True
             for func in functions:
-                if hasattr(torch.cuda, func):
+                if hasattr(tiny_torch.cuda, func):
                     print(f"   ✓ {func}")
                 else:
                     print(f"   ✗ {func} 缺失")
@@ -124,24 +124,24 @@ def run_functional_tests():
             
             results['cuda模块'] = all_exist
         else:
-            print("❌ torch.cuda模块不存在")
+            print("❌ tiny_torch.cuda模块不存在")
             results['cuda模块'] = False
     except Exception as e:
-        print(f"❌ 测试torch.cuda模块失败: {e}")
+        print(f"❌ 测试tiny_torch.cuda模块失败: {e}")
         results['cuda模块'] = False
     
     # 测试CUDA功能
     print("\n🔍 测试CUDA基本功能...")
     try:
-        if torch.cuda.is_available():
-            print(f"✅ CUDA可用性: {torch.cuda.is_available()}")
-            print(f"✅ 设备数量: {torch.cuda.device_count()}")
-            print(f"✅ 当前设备: {torch.cuda.current_device()}")
+        if tiny_torch.cuda.is_available():
+            print(f"✅ CUDA可用性: {tiny_torch.cuda.is_available()}")
+            print(f"✅ 设备数量: {tiny_torch.cuda.device_count()}")
+            print(f"✅ 当前设备: {tiny_torch.cuda.current_device()}")
             
             # 测试设备信息
-            for i in range(torch.cuda.device_count()):
-                name = torch.cuda.get_device_name(i)
-                props = torch.cuda.get_device_properties(i)
+            for i in range(tiny_torch.cuda.device_count()):
+                name = tiny_torch.cuda.get_device_name(i)
+                props = tiny_torch.cuda.get_device_properties(i)
                 print(f"✅ GPU {i}: {name}")
                 if props:
                     total_mem = props.get('total_memory', 0)
@@ -239,20 +239,20 @@ def run_demo():
     print("-" * 30)
     
     try:
-        import torch
+        import tiny_torch
         
-        print(f"📦 Tiny-Torch版本: {torch.__version__}")
-        print(f"🔧 CUDA可用性: {torch.cuda.is_available()}")
+        print(f"📦 Tiny-Torch版本: {tiny_torch.__version__}")
+        print(f"🔧 CUDA可用性: {tiny_torch.cuda.is_available()}")
         
-        if torch.cuda.is_available():
-            print(f"🎮 GPU设备数量: {torch.cuda.device_count()}")
-            print(f"🎯 当前设备: {torch.cuda.current_device()}")
-            print(f"📊 CUDA版本: {torch.cuda.version()}")
+        if tiny_torch.cuda.is_available():
+            print(f"🎮 GPU设备数量: {tiny_torch.cuda.device_count()}")
+            print(f"🎯 当前设备: {tiny_torch.cuda.current_device()}")
+            print(f"📊 CUDA版本: {tiny_torch.cuda.version()}")
             
             print("\n📋 GPU设备详细信息:")
-            for i in range(torch.cuda.device_count()):
-                name = torch.cuda.get_device_name(i)
-                props = torch.cuda.get_device_properties(i)
+            for i in range(tiny_torch.cuda.device_count()):
+                name = tiny_torch.cuda.get_device_name(i)
+                props = tiny_torch.cuda.get_device_properties(i)
                 print(f"   GPU {i}: {name}")
                 if props:
                     print(f"     内存: {props['total_memory'] // (1024**3)} GB")
