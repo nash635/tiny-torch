@@ -1,5 +1,5 @@
 """
-torch.cuda
+tiny_torch.cuda
 CUDA支持模块 - Tiny-Torch的CUDA功能接口
 """
 

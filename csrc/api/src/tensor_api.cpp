@@ -1,4 +1,4 @@
 // tensor_api.cpp - Placeholder implementation
-namespace torch {
+namespace tiny_torch {
     // Placeholder for tensor API
 }

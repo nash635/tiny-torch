@@ -1,5 +1,5 @@
 """
-torch/__init__.py
+tiny_torch/__init__.py
 Tiny-Torch 主模块 (参考 pytorch/torch/__init__.py)
 """
 
@@ -7,7 +7,7 @@ Tiny-Torch 主模块 (参考 pytorch/torch/__init__.py)
 __version__ = "0.1.0"
 
 # 导入核心模块（暂时为占位符，后续实现）
-# from torch._C import *  # C扩展模块
+# from tiny_torch._C import *  # C扩展模块
 
 # 占位符实现，确保包结构正确
 def tensor(*args, **kwargs):

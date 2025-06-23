@@ -18,50 +18,50 @@ class BuildSystemTestFailure(Exception):
     pass
 
 def test_import_torch():
-    """测试能否导入torch模块"""
+    """测试能否导入tiny_torch模块"""
     try:
-        import torch
-        if torch.__version__ != "0.1.0":
-            raise BuildSystemTestFailure(f"Expected version 0.1.0, got {torch.__version__}")
-        print(f"✓ Successfully imported torch v{torch.__version__}")
+        import tiny_torch
+        if tiny_torch.__version__ != "0.1.0":
+            raise BuildSystemTestFailure(f"Expected version 0.1.0, got {tiny_torch.__version__}")
+        print(f"✓ Successfully imported tiny_torch v{tiny_torch.__version__}")
     except ImportError as e:
-        raise BuildSystemTestFailure(f"Failed to import torch: {e}")
+        raise BuildSystemTestFailure(f"Failed to import tiny_torch: {e}")
 
 def test_submodule_imports():
     """测试子模块导入"""
     try:
-        import torch.nn
-        import torch.optim
-        import torch.autograd
+        import tiny_torch.nn
+        import tiny_torch.optim
+        import tiny_torch.autograd
         print("✓ Successfully imported all submodules")
     except ImportError as e:
         raise BuildSystemTestFailure(f"Failed to import submodules: {e}")
 
 def test_placeholder_functions():
     """测试占位符函数是否正确抛出NotImplementedError"""
-    import torch
+    import tiny_torch
     
     try:
-        torch.tensor([1, 2, 3])
-        raise BuildSystemTestFailure("torch.tensor should raise NotImplementedError")
+        tiny_torch.tensor([1, 2, 3])
+        raise BuildSystemTestFailure("tiny_torch.tensor should raise NotImplementedError")
     except NotImplementedError:
         pass
     
     try:
-        torch.add(1, 2)
-        raise BuildSystemTestFailure("torch.add should raise NotImplementedError")
+        tiny_torch.add(1, 2)
+        raise BuildSystemTestFailure("tiny_torch.add should raise NotImplementedError")
     except NotImplementedError:
         pass
     
     try:
-        torch.nn.Module()
-        raise BuildSystemTestFailure("torch.nn.Module should raise NotImplementedError")
+        tiny_torch.nn.Module()
+        raise BuildSystemTestFailure("tiny_torch.nn.Module should raise NotImplementedError")
     except NotImplementedError:
         pass
     
     try:
-        torch.optim.SGD([])
-        raise BuildSystemTestFailure("torch.optim.SGD should raise NotImplementedError")
+        tiny_torch.optim.SGD([])
+        raise BuildSystemTestFailure("tiny_torch.optim.SGD should raise NotImplementedError")
     except NotImplementedError:
         pass
     
@@ -104,7 +104,7 @@ def test_project_structure():
     """测试项目结构"""
     required_dirs = [
         "csrc",
-        "torch",
+        "tiny_torch",
         "test", 
         "tools",
         "docs",

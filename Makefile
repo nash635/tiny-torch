@@ -39,7 +39,7 @@ clean:
 	rm -rf build/
 	rm -rf dist/
 	rm -rf *.egg-info/
-	rm -rf torch/_C*.so
+	rm -rf tiny_torch/_C*.so
 	rm -rf **/__pycache__/
 	rm -rf .pytest_cache/
 	rm -rf htmlcov/
@@ -95,8 +95,8 @@ lint:
 # 代码格式化
 format:
 	@echo "Formatting code..."
-	black torch/ test/ examples/
-	isort torch/ test/ examples/
+	black tiny_torch/ test/ examples/
+	isort tiny_torch/ test/ examples/
 	clang-format -i csrc/**/*.cpp csrc/**/*.h csrc/**/*.cu
 
 # 构建文档

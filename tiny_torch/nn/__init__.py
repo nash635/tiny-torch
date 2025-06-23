@@ -1,5 +1,5 @@
 """
-torch/nn/__init__.py
+tiny_torch/nn/__init__.py
 神经网络模块 (参考 pytorch/torch/nn/__init__.py)
 """
 

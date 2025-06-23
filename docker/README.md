@@ -85,7 +85,7 @@ docker-compose run --rm tiny-torch-dev
 cd /workspace
 make install          # 构建项目
 make test             # 运行测试
-python -c "import torch; print(torch.__version__)"
+python -c "import tiny_torch; print(tiny_torch.__version__)"
 ```
 
 ### 2. Jupyter开发
@@ -107,7 +107,7 @@ python -c "import torch; print(torch.__version__)"
 # 在容器内使用开发工具
 pytest test/                  # 运行测试
 black .                      # 代码格式化
-mypy torch/                  # 类型检查
+mypy tiny_torch/                  # 类型检查
 ```
 
 ## 📋 构建和测试说明
@@ -139,17 +139,17 @@ docker-compose run --rm tiny-torch-cpu python --version
 
 # 2. 测试PyTorch安装
 docker-compose run --rm tiny-torch-cpu python -c "
-import torch
-print(f'PyTorch version: {torch.__version__}')
-print(f'CUDA available: {torch.cuda.is_available()}')
+import tiny_torch
+print(f'PyTorch version: {tiny_torch.__version__}')
+print(f'CUDA available: {tiny_torch.cuda.is_available()}')
 "
 
 # 3. 测试基本tensor操作
 docker-compose run --rm tiny-torch-cpu python -c "
-import torch
-x = torch.randn(3, 3)
-y = torch.randn(3, 3)
-z = torch.matmul(x, y)
+import tiny_torch
+x = tiny_torch.randn(3, 3)
+y = tiny_torch.randn(3, 3)
+z = tiny_torch.matmul(x, y)
 print(f'Matrix multiplication result shape: {z.shape}')
 "
 ```
@@ -205,21 +205,21 @@ docker run --rm --gpus all nvidia/cuda:12.9.1-base-ubuntu22.04 nvidia-smi
 
 # 2. 测试PyTorch GPU支持
 docker-compose run --rm tiny-torch-dev python -c "
-import torch
-print(f'CUDA available: {torch.cuda.is_available()}')
-if torch.cuda.is_available():
-    print(f'GPU count: {torch.cuda.device_count()}')
-    print(f'Current GPU: {torch.cuda.current_device()}')
-    print(f'GPU name: {torch.cuda.get_device_name()}')
+import tiny_torch
+print(f'CUDA available: {tiny_torch.cuda.is_available()}')
+if tiny_torch.cuda.is_available():
+    print(f'GPU count: {tiny_torch.cuda.device_count()}')
+    print(f'Current GPU: {tiny_torch.cuda.current_device()}')
+    print(f'GPU name: {tiny_torch.cuda.get_device_name()}')
 "
 
 # 3. 测试GPU tensor操作
 docker-compose run --rm tiny-torch-dev python -c "
-import torch
-if torch.cuda.is_available():
-    x = torch.randn(1000, 1000).cuda()
-    y = torch.randn(1000, 1000).cuda()
-    z = torch.matmul(x, y)
+import tiny_torch
+if tiny_torch.cuda.is_available():
+    x = tiny_torch.randn(1000, 1000).cuda()
+    y = tiny_torch.randn(1000, 1000).cuda()
+    z = tiny_torch.matmul(x, y)
     print(f'GPU computation successful: {z.shape}')
 else:
     print('GPU not available for testing')
@@ -301,7 +301,7 @@ DOCKER_BUILDKIT=0 docker build -f docker/Dockerfile -t tiny-torch:dev .
 # 检查容器内部状态
 docker-compose run --rm tiny-torch-cpu bash -c "
 echo 'Python version:' && python --version
-echo 'PyTorch version:' && python -c 'import torch; print(torch.__version__)'
+echo 'PyTorch version:' && python -c 'import tiny_torch; print(tiny_torch.__version__)'
 echo 'Working directory:' && pwd
 echo 'Files:' && ls -la
 "

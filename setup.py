@@ -177,7 +177,7 @@ def cmake_build():
         f"-DWITH_CUDA={'ON' if WITH_CUDA else 'OFF'}",
         f"-DWITH_MKL={'ON' if WITH_MKL else 'OFF'}",
         f"-DWITH_OPENMP={'ON' if WITH_OPENMP else 'OFF'}",
-        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/torch",
+        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/tiny_torch",
     ]
     
     # 使用ninja如果可用
@@ -287,7 +287,7 @@ def cmake_build():
         f"-DWITH_CUDA={'ON' if WITH_CUDA else 'OFF'}",
         f"-DWITH_MKL={'ON' if WITH_MKL else 'OFF'}",
         f"-DWITH_OPENMP={'ON' if WITH_OPENMP else 'OFF'}",
-        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/torch",
+        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/tiny_torch",
     ]
     
     # 使用ninja如果可用
@@ -406,7 +406,7 @@ def get_extensions():
     
     # 创建扩展
     ext = Pybind11Extension(
-        "torch._C",
+        "tiny_torch._C",
         sources=sources,
         include_dirs=include_dirs,
         libraries=libraries,
