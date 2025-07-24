@@ -93,7 +93,7 @@ def setup_color_output():
         os.environ[key] = value
     
     if VERBOSE:
-        print("✅ Enabled forced color output for build tools")
+        print("[INFO] Enabled forced color output for build tools")
 
 def check_env():
     """检查构建环境"""
@@ -191,11 +191,11 @@ def cmake_build():
         result = subprocess.run([
             "cmake", str(ROOT_DIR), *cmake_args
         ], cwd=cmake_build_dir, capture_output=True, text=True, check=True)
-        print("✅ CMake configure successful")
+        print("[PASS] CMake configure successful")
         if VERBOSE:
             print(result.stdout)
     except subprocess.CalledProcessError as e:
-        print(f"❌ CMake configure failed: {e}")
+        print(f"[FAIL] CMake configure failed: {e}")
         if e.stderr:
             print("Error output:", e.stderr)
         if e.stdout:
@@ -215,11 +215,11 @@ def cmake_build():
                 build_cmd.append("VERBOSE=1")
                 
         result = subprocess.run(build_cmd, cwd=cmake_build_dir, capture_output=True, text=True, check=True)
-        print("✅ Build successful")
+        print("[PASS] Build successful")
         if VERBOSE:
             print(result.stdout)
     except subprocess.CalledProcessError as e:
-        print(f"❌ Build failed: {e}")
+        print(f"[FAIL] Build failed: {e}")
         if e.stderr:
             print("Error output:", e.stderr)
         if e.stdout:
@@ -227,7 +227,7 @@ def cmake_build():
         
         # 如果Ninja失败，尝试降级到Make
         if USE_NINJA:
-            print("🔄 Ninja build failed, trying fallback to Make...")
+            print("[RETRY] Ninja build failed, trying fallback to Make...")
             try:
                 # 重新配置使用Make
                 cmake_args_make = [arg for arg in cmake_args if not arg.startswith("-GNinja")]
@@ -237,9 +237,9 @@ def cmake_build():
                 
                 # 用Make构建
                 subprocess.run(["make", "-j"], cwd=cmake_build_dir, check=True)
-                print("✅ Make fallback build successful")
+                print("[PASS] Make fallback build successful")
             except subprocess.CalledProcessError as fallback_e:
-                print(f"❌ Make fallback also failed: {fallback_e}")
+                print(f"[FAIL] Make fallback also failed: {fallback_e}")
                 return False
         else:
             return False

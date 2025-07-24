@@ -23,7 +23,7 @@ def test_import_torch():
         import tiny_torch
         if tiny_torch.__version__ != "0.1.0":
             raise BuildSystemTestFailure(f"Expected version 0.1.0, got {tiny_torch.__version__}")
-        print(f"✓ Successfully imported tiny_torch v{tiny_torch.__version__}")
+        print(f"[PASS] Successfully imported tiny_torch v{tiny_torch.__version__}")
     except ImportError as e:
         raise BuildSystemTestFailure(f"Failed to import tiny_torch: {e}")
 
@@ -33,7 +33,7 @@ def test_submodule_imports():
         import tiny_torch.nn
         import tiny_torch.optim
         import tiny_torch.autograd
-        print("✓ Successfully imported all submodules")
+        print("[PASS] Successfully imported all submodules")
     except ImportError as e:
         raise BuildSystemTestFailure(f"Failed to import submodules: {e}")
 
@@ -65,7 +65,7 @@ def test_placeholder_functions():
     except NotImplementedError:
         pass
     
-    print("✓ All placeholder functions correctly raise NotImplementedError")
+    print("[PASS] All placeholder functions correctly raise NotImplementedError")
 
 def test_build_environment():
     """测试构建环境"""
@@ -78,7 +78,7 @@ def test_build_environment():
         assert env['platform']
         assert env['architecture']
         
-        print(f"✓ Build environment check passed")
+        print(f"[PASS] Build environment check passed")
         print(f"  Python: {env['python_version']}")
         print(f"  Platform: {env['platform']}")
         print(f"  Architecture: {env['architecture']}")
@@ -96,9 +96,9 @@ def test_cmake_availability():
             check=True
         )
         version_line = result.stdout.split('\n')[0]
-        print(f"✓ CMake available: {version_line}")
+        print(f"[PASS] CMake available: {version_line}")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("⚠ CMake not available (skipping)")
+        print("[WARNING] CMake not available (skipping)")
 
 def test_project_structure():
     """测试项目结构"""
@@ -133,7 +133,7 @@ def test_project_structure():
         if not file_path.exists():
             raise BuildSystemTestFailure(f"Required file {file_name} not found")
     
-    print("✓ Project structure is complete")
+    print("[PASS] Project structure is complete")
 
 if __name__ == "__main__":
     # 直接运行测试
@@ -144,4 +144,4 @@ if __name__ == "__main__":
     test_build_environment()
     test_cmake_availability()
     test_project_structure()
-    print("All tests passed! ✓")
+    print("All tests passed! [SUCCESS]")

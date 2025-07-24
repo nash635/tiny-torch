@@ -1,20 +1,12 @@
 # Memory Debug Tools Requirements
 # 显存调试工具依赖项
 
-# 数值计算和数据处理
+# 核心依赖
 numpy>=1.19.0
-
-# 绘图和可视化
-matplotlib>=3.3.0
-
-# 系统和进程监控
+matplotlib>=3.3.0  
 psutil>=5.7.0
 
-# 网络编程和序列化（Python标准库，无需安装）
-# socket, pickle, threading, multiprocessing, json
-
-# 可选依赖（用于高级功能）
-# torch>=1.8.0  # 如果需要集成PyTorch内置的内存分析工具
-# tensorboard>=2.4.0  # 如果需要TensorBoard可视化集成
-# jupyter>=1.0.0  # 如果需要在Jupyter中使用
-# pandas>=1.1.0  # 如果需要数据分析功能
+# 可选依赖（用于扩展功能）
+# pandas>=1.1.0      # 数据分析
+# jupyter>=1.0.0     # Jupyter集成
+# tensorboard>=2.4.0 # TensorBoard可视化

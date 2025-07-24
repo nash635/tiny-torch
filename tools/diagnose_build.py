@@ -17,7 +17,7 @@ def print_section(title):
     print(f"{'='*60}")
 
 def print_subsection(title):
-    print(f"\n🔹 {title}")
+    print(f"\n{title}")
     print("-" * 40)
 
 def run_command(cmd, description, capture_output=True):
@@ -27,25 +27,25 @@ def run_command(cmd, description, capture_output=True):
         if capture_output:
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
             if result.returncode == 0:
-                print(f"✅ Success: {description}")
+                print(f"[PASS] Success: {description}")
                 return result.stdout.strip()
             else:
-                print(f"❌ Failed: {description}")
+                print(f"[FAIL] Failed: {description}")
                 print(f"Error: {result.stderr}")
                 return None
         else:
             result = subprocess.run(cmd, shell=True, timeout=30)
             if result.returncode == 0:
-                print(f"✅ Success: {description}")
+                print(f"[PASS] Success: {description}")
                 return True
             else:
-                print(f"❌ Failed: {description}")
+                print(f"[FAIL] Failed: {description}")
                 return False
     except subprocess.TimeoutExpired:
-        print(f"⏰ Timeout: {description}")
+        print(f"[TIMEOUT] Timeout: {description}")
         return None
     except Exception as e:
-        print(f"💥 Exception: {description} - {e}")
+        print(f"[ERROR] Exception: {description} - {e}")
         return None
 
 def main():
@@ -64,20 +64,20 @@ def main():
     # Check for .egg-info directories
     egg_info_dirs = glob.glob("*.egg-info")
     if egg_info_dirs:
-        print(f"❌ Found {len(egg_info_dirs)} .egg-info directories:")
+        print(f"[FOUND] Found {len(egg_info_dirs)} .egg-info directories:")
         for dir_name in egg_info_dirs:
             print(f"   - {dir_name}")
         print("   This can cause the 'Multiple .egg-info directories found' error")
     else:
-        print("✅ No .egg-info directories found")
+        print("[PASS] No .egg-info directories found")
     
     # Check for build directories
     build_dirs = ["build", "dist", "__pycache__", ".pytest_cache"]
     for dir_name in build_dirs:
         if Path(dir_name).exists():
-            print(f"📁 Found build directory: {dir_name}")
+            print(f"[FOUND] Found build directory: {dir_name}")
         else:
-            print(f"✅ No {dir_name} directory")
+            print(f"[PASS] No {dir_name} directory")
     
     # 3. Package dependencies
     print_subsection("3. Package Dependencies")
@@ -92,16 +92,16 @@ def main():
     for package, import_name in required_packages.items():
         try:
             __import__(import_name)
-            print(f"✅ {package}: Available")
+            print(f"[PASS] {package}: Available")
         except ImportError:
-            print(f"❌ {package}: Missing")
+            print(f"[FAIL] {package}: Missing")
     
     # Check ninja separately since it's a command-line tool, not a Python package
     ninja_check = run_command("which ninja", "Check ninja availability", capture_output=True)
     if ninja_check:
-        print(f"✅ ninja: Available")
+        print(f"[PASS] ninja: Available")
     else:
-        print(f"❌ ninja: Missing")
+        print(f"[FAIL] ninja: Missing")
     
     # 4. Tools availability
     print_subsection("4. Build Tools")
@@ -145,24 +145,24 @@ def main():
     for pattern in cleanup_paths:
         matches = glob.glob(pattern, recursive=True)
         if matches:
-            print(f"🧹 Found {len(matches)} items matching '{pattern}':")
+            print(f"[CLEANUP] Found {len(matches)} items matching '{pattern}':")
             for match in matches:
                 print(f"   - {match}")
         else:
-            print(f"✅ No items matching '{pattern}'")
+            print(f"[PASS] No items matching '{pattern}'")
     
     # 6. Suggested fixes
     print_subsection("6. Suggested Fixes")
     
     if egg_info_dirs:
-        print("🔧 Fix for multiple .egg-info directories:")
+        print("[FIX] Fix for multiple .egg-info directories:")
         print("   rm -rf *.egg-info")
         
-    print("\n🔧 Complete cleanup command:")
+    print("\n[FIX] Complete cleanup command:")
     print("   rm -rf build/ dist/ *.egg-info/ __pycache__/ .pytest_cache/")
     print("   find . -name '*.pyc' -delete")
     
-    print("\n🔧 Recommended installation sequence:")
+    print("\n[RECOMMENDED] Recommended installation sequence:")
     print("   1. rm -rf build/ dist/ *.egg-info/")
     print("   2. pip3 install -r requirements.txt")
     print("   3. python3 setup.py build_ext --inplace")
@@ -180,10 +180,10 @@ def main():
     print_section("Diagnostic Complete")
     
     if egg_info_dirs:
-        print("⚠️  Action required: Clean up .egg-info directories")
+        print("[WARNING] Action required: Clean up .egg-info directories")
         return False
     else:
-        print("✅ No major issues detected")
+        print("[PASS] No major issues detected")
         return True
 
 if __name__ == "__main__":

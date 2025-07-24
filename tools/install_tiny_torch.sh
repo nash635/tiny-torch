@@ -84,7 +84,7 @@ main() {
     
     # Verify installation
     print_status "Verifying installation..."
-    if python -c "import tiny_torch; print('✅ tiny_torch imported successfully')"; then
+    if python -c "import tiny_torch; print('[PASS] tiny_torch imported successfully')"; then
         print_success "Installation completed successfully!"
     else
         print_error "Installation verification failed"
@@ -96,7 +96,7 @@ main() {
 import tiny_torch
 print(f'Tiny-Torch version: {tiny_torch.__version__}')
 print(f'CUDA available: {tiny_torch.cuda.is_available()}')
-print('✅ Basic functionality verified')
+print('[PASS] Basic functionality verified')
 "; then
         print_success "All tests passed!"
     else

@@ -33,13 +33,13 @@ def main():
             missing_deps.append("pybind11")
         
         if missing_deps:
-            print(f"\n❌ Missing dependencies:")
+            print(f"\n[FAIL] Missing dependencies:")
             for dep in missing_deps:
                 print(f"   - {dep}")
             print("\nPlease install missing dependencies before building.")
             return 1
         else:
-            print(f"\n✅ All required dependencies are available!")
+            print(f"\n[PASS] All required dependencies are available!")
             
             # 显示推荐的构建命令
             print(f"\nRecommended build commands:")
@@ -52,7 +52,7 @@ def main():
             return 0
             
     except Exception as e:
-        print(f"❌ Error checking environment: {e}")
+        print(f"[ERROR] Error checking environment: {e}")
         return 1
 
 if __name__ == "__main__":
