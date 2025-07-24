@@ -221,14 +221,14 @@ class MemoryProfiler:
         self.monitor_thread = threading.Thread(target=self._monitor_loop)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
-        print(f"📊 开始监控 {len(self.devices)} 个GPU设备")
+        print(f"[INFO] 开始监控 {len(self.devices)} 个GPU设备")
     
     def stop_monitoring(self):
         """停止监控"""
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=1.0)
-        print("🔄 停止内存监控")
+        print("[INFO] 停止内存监控")
     
     def _monitor_loop(self):
         """监控循环"""
@@ -327,7 +327,7 @@ class OOMDetector:
         
     def _default_warning_callback(self, prediction: OOMPrediction):
         """默认警告回调"""
-        print(f"⚠️  OOM警告: GPU {prediction.device_id}")
+        print(f"[WARNING] OOM警告: GPU {prediction.device_id}")
         print(f"   风险等级: {prediction.risk_level.value}")
         print(f"   当前使用率: {prediction.current_usage:.1f}%")
         if prediction.predicted_oom_time:
@@ -346,14 +346,14 @@ class OOMDetector:
         self.monitor_thread = threading.Thread(target=self._monitor_loop)
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
-        print(f"🚨 开始OOM监控 (阈值: {self.threshold}%)")
+        print(f"[INFO] 开始OOM监控 (阈值: {self.threshold}%)")
     
     def stop_monitoring(self):
         """停止监控"""
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=1.0)
-        print("🔄 停止OOM监控")
+        print("[INFO] 停止OOM监控")
     
     def _get_available_devices(self) -> List[int]:
         """获取可用设备"""
@@ -466,12 +466,12 @@ class MemoryLeakDetector:
                 self.baseline_memory[device_id] = usage
         
         self.monitoring = True
-        print("🔍 开始内存泄漏检测")
+        print("[INFO] 开始内存泄漏检测")
     
     def stop_monitoring(self):
         """停止检测"""
         self.monitoring = False
-        print("🔄 停止内存泄漏检测")
+        print("[INFO] 停止内存泄漏检测")
     
     def _get_available_devices(self) -> List[int]:
         """获取可用设备"""
@@ -545,7 +545,7 @@ class MemoryDebugger:
                         devices: Optional[List[int]] = None,
                         oom_threshold: float = 85.0):
         """开始全面监控"""
-        print("🚀 启动内存调试工具...")
+        print("[INFO] 启动内存调试工具...")
         
         if enable_profiler:
             self.profiler = MemoryProfiler(devices=devices)
@@ -562,16 +562,16 @@ class MemoryDebugger:
             self.leak_detector.start_monitoring(devices=devices)
             self.active_tools.append(self.leak_detector)
         
-        print(f"✅ 已启动 {len(self.active_tools)} 个监控工具")
+        print(f"[INFO] 已启动 {len(self.active_tools)} 个监控工具")
     
     def stop_monitoring(self):
         """停止所有监控"""
-        print("🔄 停止所有内存监控工具...")
+        print("[INFO] 停止所有内存监控工具...")
         for tool in self.active_tools:
             if hasattr(tool, 'stop_monitoring'):
                 tool.stop_monitoring()
         self.active_tools.clear()
-        print("✅ 所有监控工具已停止")
+        print("[INFO] 所有监控工具已停止")
     
     def get_status_report(self) -> Dict[str, Any]:
         """获取状态报告"""
@@ -653,7 +653,7 @@ def main():
     stop_event = threading.Event()
     
     def signal_handler(signum, frame):
-        print("\n🔄 收到退出信号，正在停止...")
+        print("\n[INFO] 收到退出信号，正在停止...")
         stop_event.set()
     
     signal.signal(signal.SIGINT, signal_handler)
@@ -667,7 +667,7 @@ def main():
             )
             profiler.start_monitoring()
             
-            print(f"📊 开始内存分析 (时长: {args.duration}秒)")
+            print(f"[INFO] 开始内存分析 (时长: {args.duration}秒)")
             
             if args.duration > 0:
                 for i in range(args.duration):
@@ -676,17 +676,17 @@ def main():
                     if (i + 1) % 10 == 0:
                         print(f"   进度: {i + 1}/{args.duration}秒")
             else:
-                print("📊 持续监控中 (按Ctrl+C停止)...")
+                print("[INFO] 持续监控中 (按Ctrl+C停止)...")
                 stop_event.wait()
             
             profiler.stop_monitoring()
             report = profiler.generate_report(args.output)
-            print(f"📄 报告已保存: {args.output}")
+            print(f"[INFO] 报告已保存: {args.output}")
             
             # 显示摘要
             if 'summary' in report:
                 summary = report['summary']
-                print(f"\n📈 监控摘要:")
+                print(f"\n[INFO] 监控摘要:")
                 print(f"   设备数: {summary['total_devices']}")
                 print(f"   总显存: {summary['total_memory_gb']:.2f} GB")
                 print(f"   已使用: {summary['total_used_gb']:.2f} GB")
@@ -697,10 +697,10 @@ def main():
             detector.start_monitoring(devices=args.devices)
             
             if args.monitor:
-                print(f"🚨 OOM监控中 (阈值: {args.threshold}%) - 按Ctrl+C停止")
+                print(f"[INFO] OOM监控中 (阈值: {args.threshold}%) - 按Ctrl+C停止")
                 stop_event.wait()
             else:
-                print("🚨 OOM检测运行5分钟...")
+                print("[INFO] OOM检测运行5分钟...")
                 stop_event.wait(300)
             
             detector.stop_monitoring()
@@ -712,17 +712,17 @@ def main():
             detector.start_monitoring(devices=args.devices)
             
             if args.check:
-                print("🔍 检查内存泄漏...")
+                print("[INFO] 检查内存泄漏...")
                 time.sleep(5)  # 等待一段时间观察
                 leaks = detector.check_for_leaks()
                 
                 if leaks:
-                    print(f"⚠️  发现 {len(leaks)} 个潜在内存泄漏:")
+                    print(f"[WARNING] 发现 {len(leaks)} 个潜在内存泄漏:")
                     for leak in leaks:
                         print(f"   GPU {leak.device_id}: {leak.leaked_memory/(1024**2):.1f} MB")
                         print(f"   严重程度: {leak.severity}")
                 else:
-                    print("✅ 未发现明显的内存泄漏")
+                    print("[INFO] 未发现明显的内存泄漏")
             
             detector.stop_monitoring()
         
@@ -731,7 +731,7 @@ def main():
             debugger.start_monitoring(devices=args.devices)
             
             duration = args.duration if args.duration > 0 else float('inf')
-            print(f"🔍 全面监控中 - 按Ctrl+C停止")
+            print(f"[INFO] 全面监控中 - 按Ctrl+C停止")
             
             start_time = time.time()
             while time.time() - start_time < duration:
@@ -740,14 +740,14 @@ def main():
                 
                 # 每10秒显示一次状态
                 report = debugger.get_status_report()
-                print(f"📊 状态: {report.get('active_tools', 0)} 个工具运行中")
+                print(f"[INFO] 状态: {report.get('active_tools', 0)} 个工具运行中")
             
             debugger.stop_monitoring()
     
     except KeyboardInterrupt:
-        print("\n🔄 用户中断，正在退出...")
+        print("\n[INFO] 用户中断，正在退出...")
     except Exception as e:
-        print(f"❌ 错误: {e}")
+        print(f"[ERROR] 错误: {e}")
         import traceback
         traceback.print_exc()
 

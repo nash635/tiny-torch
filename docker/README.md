@@ -2,7 +2,7 @@
 
 本目录包含了Tiny-Torch项目的Docker开发环境配置，支持GPU（CUDA 12.9.1）和CPU两种开发模式，内置PyTorch 2.7.1支持。
 
-## 🚀 快速开始
+## 快速开始
 
 ### 1. 构建Docker镜像
 
@@ -40,7 +40,7 @@ docker-compose run --rm tiny-torch-dev
 ./docker/build.sh project-test
 ```
 
-## 📦 环境配置
+## 环境配置
 
 ### GPU版本 (tiny-torch:dev)
 - **基础镜像**: nvidia/cuda:12.9.1-devel-ubuntu22.04
@@ -73,7 +73,7 @@ docker-compose run --rm tiny-torch-dev
 - Git, vim, htop, tree
 - 完整的C++编译工具链
 
-## 🛠️ 开发工作流
+## 开发工作流
 
 ### 1. 日常开发
 
@@ -110,7 +110,7 @@ black .                      # 代码格式化
 mypy tiny_torch/                  # 类型检查
 ```
 
-## 📋 构建和测试说明
+## 构建和测试说明
 
 ### 自动化构建
 
@@ -226,7 +226,7 @@ else:
 "
 ```
 
-## 🔧 统一管理脚本
+## 统一管理脚本
 
 ### `./docker/build.sh` - 统一管理脚本
 
@@ -259,7 +259,7 @@ else:
 ./docker/build.sh help                    # 显示帮助
 ```
 
-## 🐛 故障排除
+## 故障排除
 
 ### 常见问题
 
@@ -307,7 +307,7 @@ echo 'Files:' && ls -la
 "
 ```
 
-## 📚 进阶使用
+## 进阶使用
 
 ### 1. 数据卷挂载
 
@@ -346,7 +346,7 @@ docker-compose run -p 6006:6006 --rm tiny-torch-dev
 # 配置Docker作为远程Python解释器
 ```
 
-## 📝 开发注意事项
+## 开发注意事项
 
 1. **数据持久化**: 容器内的 `/workspace` 目录挂载到项目根目录，数据会持久化
 2. **GPU内存**: GPU版本默认使用所有可用GPU，可通过环境变量限制
@@ -354,7 +354,7 @@ docker-compose run -p 6006:6006 --rm tiny-torch-dev
 4. **用户权限**: 容器内使用非root用户 `tinytorch` 运行，避免权限问题
 5. **依赖更新**: 如需添加新依赖，更新Dockerfile并重新构建镜像
 
-## 🤝 贡献
+## 贡献
 
 如需改进Docker环境配置，请遵循以下步骤：
 

@@ -17,11 +17,11 @@ def print_header(title):
     print(f"{'='*60}")
 
 def print_section(title):
-    print(f"\n🔹 {title}")
+    print(f"\n{title}")
     print("-" * 40)
 
 def check_status(condition, message):
-    status = "✅" if condition else "❌"
+    status = "[PASS]" if condition else "[FAIL]"
     print(f"  {status} {message}")
     return condition
 
@@ -31,12 +31,12 @@ def check_tool(cmd, name):
         result = subprocess.run([cmd, "--version"], capture_output=True, text=True, timeout=5)
         if result.returncode == 0:
             version = result.stdout.split('\n')[0]
-            print(f"  ✅ {name}: {version}")
+            print(f"  [PASS] {name}: {version}")
             return True
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
         pass
     
-    print(f"  ❌ {name}: Not available")
+    print(f"  [FAIL] {name}: Not available")
     return False
 
 def main():
@@ -148,16 +148,16 @@ def main():
     print_section("6. Performance Expectations")
     
     if ninja_ok and ninja_build_files:
-        print("  🚀 High-Performance Build Mode Active")
+        print("  [HIGH-PERFORMANCE] High-Performance Build Mode Active")
         print("     • Expected 2-4x faster builds vs Make")
         print("     • Parallel compilation optimized")
         print("     • Incremental builds enhanced")
     elif make_ok:
-        print("  🔄 Standard Build Mode (Make fallback)")
+        print("  [STANDARD] Standard Build Mode (Make fallback)")
         print("     • Reliable cross-platform builds")
         print("     • Consider installing Ninja for performance")
     else:
-        print("  ⚠️  Limited build capabilities")
+        print("  [WARNING] Limited build capabilities")
         print("     • Install CMake and Make for full functionality")
     
     # 7. 总结和建议
@@ -171,49 +171,49 @@ def main():
     overall_score = sum([core_tools, project_ready, build_tested])
     
     if overall_score == 3:
-        status_emoji = "🎉"
+        status_emoji = "[EXCELLENT]"
         status_text = "FULLY READY"
         color = "\033[92m"  # Green
     elif overall_score == 2:
-        status_emoji = "✅"
+        status_emoji = "[GOOD]"
         status_text = "MOSTLY READY"
         color = "\033[93m"  # Yellow
     else:
-        status_emoji = "⚠️"
+        status_emoji = "[WARNING]"
         status_text = "NEEDS ATTENTION"
         color = "\033[91m"  # Red
     
     reset = "\033[0m"
     
-    print(f"\n{color}🏗️  BUILD SYSTEM STATUS: {status_emoji} {status_text}{reset}")
+    print(f"\n{color}BUILD SYSTEM STATUS: {status_emoji} {status_text}{reset}")
     print(f"   Overall Score: {overall_score}/3")
     
     if ninja_ok and ninja_build_files:
-        print(f"\n🥷 NINJA INTEGRATION: {color}✅ ACTIVE{reset}")
+        print(f"\nNINJA INTEGRATION: {color}[ACTIVE]{reset}")
         print("   • High-performance builds enabled")
         print("   • 2-4x speed improvement expected")
         print("   • Modern build pipeline operational")
     elif ninja_ok:
-        print(f"\n🥷 NINJA INTEGRATION: {color}⚠️  PARTIAL{reset}")
+        print(f"\nNINJA INTEGRATION: {color}[PARTIAL]{reset}")
         print("   • Ninja available but build files generation failed")
         print("   • Check CMake configuration")
     else:
-        print(f"\n🥷 NINJA INTEGRATION: ❌ NOT AVAILABLE")
+        print(f"\nNINJA INTEGRATION: [NOT AVAILABLE]")
         print("   • Install ninja: pip install ninja")
         print("   • Or: conda install ninja")
     
     # 下一步建议
-    print(f"\n📋 NEXT STEPS:")
+    print(f"\nNEXT STEPS:")
     if not ninja_ok:
         print("   1. Install Ninja: pip install ninja")
     if not cmake_success:
         print("   2. Fix CMake configuration issues")
     if overall_score == 3:
-        print("   ✅ System ready for Phase 1.2 development!")
-        print("   ✅ Begin tensor implementation")
+        print("   [PASS] System ready for Phase 1.2 development!")
+        print("   [PASS] Begin tensor implementation")
     
     # 快速命令参考
-    print(f"\n🚀 QUICK COMMANDS:")
+    print(f"\nQUICK COMMANDS:")
     print("   make build          # Standard build")
     print("   make clean          # Clean artifacts")
     if ninja_ok:

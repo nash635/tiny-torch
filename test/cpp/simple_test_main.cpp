@@ -14,11 +14,11 @@ int main() {
     try {
         std::cout << "Testing tensor operations..." << std::endl;
         test_tensor_basic();
-        std::cout << "✓ Tensor tests passed" << std::endl;
+        std::cout << "[PASS] Tensor tests passed" << std::endl;
         
         std::cout << "Testing autograd operations..." << std::endl;
         test_autograd_basic();
-        std::cout << "✓ Autograd tests passed" << std::endl;
+        std::cout << "[PASS] Autograd tests passed" << std::endl;
         
         std::cout << "All tests passed!" << std::endl;
         return 0;

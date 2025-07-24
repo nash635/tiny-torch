@@ -17,7 +17,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 def check_files():
     """检查必需的文件是否存在"""
-    print("🔍 Checking required files...")
+    print("Checking required files...")
     
     required_files = {
         # 核心构建文件
@@ -64,16 +64,16 @@ def check_files():
     for file_path, description in required_files.items():
         full_path = PROJECT_ROOT / file_path
         if full_path.exists():
-            print(f"  ✅ {file_path} ({description})")
+            print(f"  [PASS] {file_path} ({description})")
         else:
-            print(f"  ❌ {file_path} ({description}) - MISSING")
+            print(f"  [FAIL] {file_path} ({description}) - MISSING")
             missing_files.append(file_path)
     
     return len(missing_files) == 0
 
 def check_directories():
     """检查必需的目录结构"""
-    print("\n🔍 Checking directory structure...")
+    print("\nChecking directory structure...")
     
     required_dirs = {
         "csrc": "C++源码根目录",
@@ -93,16 +93,16 @@ def check_directories():
     for dir_path, description in required_dirs.items():
         full_path = PROJECT_ROOT / dir_path
         if full_path.exists():
-            print(f"  ✅ {dir_path}/ ({description})")
+            print(f"  [PASS] {dir_path}/ ({description})")
         else:
-            print(f"  ❌ {dir_path}/ ({description}) - MISSING")
+            print(f"  [FAIL] {dir_path}/ ({description}) - MISSING")
             missing_dirs.append(dir_path)
     
     return len(missing_dirs) == 0
 
 def check_build_environment():
     """检查构建环境"""
-    print("\n🔍 Checking build environment...")
+    print("\nChecking build environment...")
     
     try:
         from tools.setup_helpers.env import get_build_env
@@ -111,74 +111,74 @@ def check_build_environment():
         # 检查Python版本
         python_version = tuple(map(int, env['python_version'].split('.')))
         if python_version >= (3, 8):
-            print(f"  ✅ Python {env['python_version']} (>= 3.8)")
+            print(f"  [PASS] Python {env['python_version']} (>= 3.8)")
         else:
-            print(f"  ❌ Python {env['python_version']} (需要 >= 3.8)")
+            print(f"  [FAIL] Python {env['python_version']} (需要 >= 3.8)")
             return False
         
         # 检查CMake
         if env.get('cmake_version'):
-            print(f"  ✅ CMake {env['cmake_version']}")
+            print(f"  [PASS] CMake {env['cmake_version']}")
         else:
-            print(f"  ❌ CMake not found")
+            print(f"  [FAIL] CMake not found")
             return False
         
         # 检查编译器
         compiler = env['compiler']
         if compiler['type']:
-            print(f"  ✅ {compiler['type']} {compiler['version']}")
+            print(f"  [PASS] {compiler['type']} {compiler['version']}")
         else:
-            print(f"  ❌ C++ compiler not found")
+            print(f"  [FAIL] C++ compiler not found")
             return False
         
         # 检查依赖
         deps = env['dependencies']
         for dep_name, version in deps.items():
             if version:
-                print(f"  ✅ {dep_name} {version}")
+                print(f"  [PASS] {dep_name} {version}")
             else:
-                print(f"  ❌ {dep_name} not found")
+                print(f"  [FAIL] {dep_name} not found")
                 return False
         
         return True
         
     except Exception as e:
-        print(f"  ❌ Environment check failed: {e}")
+        print(f"  [FAIL] Environment check failed: {e}")
         return False
 
 def check_basic_functionality():
     """检查基本功能"""
-    print("\n🔍 Checking basic functionality...")
+    print("\nChecking basic functionality...")
     
     try:
         # 检查能否导入torch
         import tiny_torch
-        print(f"  ✅ torch import successful (v{tiny_torch.__version__})")
+        print(f"  [PASS] torch import successful (v{tiny_torch.__version__})")
         
         # 检查子模块导入
         import tiny_torch.nn
         import tiny_torch.optim  
         import tiny_torch.autograd
-        print(f"  ✅ All submodules import successfully")
+        print(f"  [PASS] All submodules import successfully")
         
         # 检查占位符函数
         try:
             tiny_torch.tensor([1, 2, 3])
-            print(f"  ❌ tiny_torch.tensor should raise NotImplementedError")
+            print(f"  [FAIL] tiny_torch.tensor should raise NotImplementedError")
             return False
         except NotImplementedError:
-            print(f"  ✅ tiny_torch.tensor correctly raises NotImplementedError")
+            print(f"  [PASS] tiny_torch.tensor correctly raises NotImplementedError")
         
         return True
         
     except Exception as e:
-        print(f"  ❌ Basic functionality check failed: {e}")
+        print(f"  [FAIL] Basic functionality check failed: {e}")
         return False
 
 def main():
     """主检查函数"""
     print("=" * 50)
-    print("🚀 Tiny-Torch Phase 1.1 验证")
+    print("Tiny-Torch Phase 1.1 验证")
     print("=" * 50)
     
     checks = [
@@ -193,25 +193,25 @@ def main():
         try:
             result = check_func()
             if result:
-                print(f"\n✅ {check_name} 检查通过")
+                print(f"\n[PASS] {check_name} 检查通过")
             else:
-                print(f"\n❌ {check_name} 检查失败")
+                print(f"\n[FAIL] {check_name} 检查失败")
                 all_passed = False
         except Exception as e:
-            print(f"\n❌ {check_name} 检查出错: {e}")
+            print(f"\n[ERROR] {check_name} 检查出错: {e}")
             all_passed = False
     
     print("\n" + "=" * 50)
     if all_passed:
-        print("🎉 Phase 1.1 构建系统设置完成！")
-        print("\n📋 下一步:")
+        print("[SUCCESS] Phase 1.1 构建系统设置完成！")
+        print("\n下一步:")
         print("  1. 可以运行 'make build' 尝试构建")
         print("  2. 运行 'make test' 执行测试")
         print("  3. 开始实施 Phase 1.2: 张量核心库(ATen)")
         print("=" * 50)
         return 0
     else:
-        print("❌ Phase 1.1 还未完全完成，请检查上述问题")
+        print("[FAIL] Phase 1.1 还未完全完成，请检查上述问题")
         print("=" * 50)
         return 1
 
