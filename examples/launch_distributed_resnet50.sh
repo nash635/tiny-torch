@@ -1,21 +1,21 @@
 #!/bin/bash
-# 分布式多机多卡训练ResNet50示例脚本
-# 最终目标实现 - 当前仅为规划展示
+# Distributed multi-node multi-GPU ResNet50 training script
+# Target implementation - currently for planning demonstration only
 
-# 训练配置
+# Training configuration
 MODEL="resnet50"
 DATASET="imagenet"
 BATCH_SIZE=32
 LEARNING_RATE=0.1
 EPOCHS=100
 
-# 分布式配置
-NNODES=2              # 节点数
-NPROC_PER_NODE=4      # 每节点GPU数
+# Distributed configuration
+NNODES=2              # Number of nodes
+NPROC_PER_NODE=4      # GPUs per node
 MASTER_ADDR="192.168.1.100"
 MASTER_PORT=12345
 
-# 检查节点角色
+# Check node role
 if [ "$1" == "master" ]; then
     NODE_RANK=0
     echo "Starting master node..."
@@ -27,7 +27,7 @@ else
     exit 1
 fi
 
-# 启动分布式训练 (目标实现)
+# Launch distributed training (target implementation)
 echo "Launching distributed ResNet50 training..."
 echo "Configuration:"
 echo "  - Model: $MODEL"
@@ -37,20 +37,20 @@ echo "  - Total GPUs: $((NNODES * NPROC_PER_NODE))"
 echo "  - Batch size: $BATCH_SIZE"
 echo "  - Learning rate: $LEARNING_RATE"
 
-# 检查NCCL设置
+# Check NCCL settings
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
     export CUDA_VISIBLE_DEVICES=0,1,2,3
 fi
 
-# 检查网络连接
+# Check network connectivity
 if ! ping -c 1 $MASTER_ADDR > /dev/null 2>&1; then
     echo "Warning: Cannot reach master node at $MASTER_ADDR"
-    # 如果没有InfiniBand，禁用IB
+    # If no InfiniBand, disable IB
     export NCCL_IB_DISABLE=1
 fi
 
-# 目标命令 (类似于nanoGPT的torchrun)
-# 当Tiny-Torch完全实现后的启动方式
+# Target command (similar to nanoGPT's torchrun)
+# Launch method when Tiny-Torch is fully implemented
 cat << EOF
 
 Future command when Tiny-Torch is complete:

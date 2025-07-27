@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-简化的内存工具测试脚本
-验证合并后工具的基本功能
+Simplified memory tools test script
+Verify basic functionality of merged tools
 """
 
 import sys

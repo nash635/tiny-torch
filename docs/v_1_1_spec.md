@@ -1,102 +1,102 @@
-# Phase 1.1 综合文档 - Tiny-Torch 构建系统与基础设施
+# Phase 1.1 Comprehensive Documentation - Tiny-Torch Build System and Infrastructure
 
-**版本**: v1.0  
-**适用阶段**: Phase 1.1 构建系统设置  
-**最后更新**: 2025-06-18  
+**Version**: v1.0  
+**Applicable Phase**: Phase 1.1 Build System Setup  
+**Last Updated**: 2025-06-18  
 
-## 概述
+## Overview
 
-Phase 1.1 专注于建立完整的构建系统和开发基础设施，为后续的张量实现和深度学习功能打下坚实基础。
+Phase 1.1 focuses on establishing a complete build system and development infrastructure, laying a solid foundation for subsequent tensor implementation and deep learning functionality.
 
-### 核心目标
-- **构建系统设置** - CMake + Python setuptools 混合构建
-- **CUDA 支持集成** - GPU 开发环境配置
-- **测试框架建立** - C++ 和 Python 测试体系
-- **项目结构规范** - PyTorch 风格的项目组织
+### Core Objectives
+- **Build System Setup** - CMake + Python setuptools hybrid build
+- **CUDA Support Integration** - GPU development environment configuration
+- **Testing Framework Establishment** - C++ and Python testing systems
+- **Project Structure Standards** - PyTorch-style project organization
 
-### 关键指标
+### Key Metrics
 
-| 指标 | 数值 | 说明 |
-|------|------|------|
-| 构建成功率 | 100% | Linux 平台编译通过 |
-| CUDA 支持度 | 95% | 6/6 源文件编译，运行时就绪 |
-| 测试覆盖率 | 90% | 核心功能验证完成 |
-| 静态库大小 | 39KB | 高效的代码生成 |
+| Metric | Value | Description |
+|--------|-------|-------------|
+| Build Success Rate | 100% | Linux platform compilation passed |
+| CUDA Support Level | 95% | 6/6 source files compiled, runtime ready |
+| Test Coverage | 90% | Core functionality verification completed |
+| Static Library Size | 39KB | Efficient code generation |
 
-## 项目结构
+## Project Structure
 
 ```
 tiny-tiny_torch/
-├── CMakeLists.txt           # 主构建配置
-├── setup.py                 # Python 扩展构建
-├── Makefile                 # 便捷构建接口
-├── pyproject.toml           # 项目配置
-├── csrc/                    # C++ 源代码
-│   ├── aten/               # 张量库核心
-│   │   ├── include/        # 头文件
-│   │   └── src/            # 实现文件
-│   │       ├── ATen/       # 核心张量实现
-│   │       └── TH/         # 底层张量操作
-│   ├── autograd/           # 自动微分引擎
-│   └── api/                # Python 绑定层
-├── tiny_torch/                   # Python 包
-│   ├── __init__.py         # 主模块
-│   ├── autograd/           # 自动微分 Python 接口
-│   ├── cuda/               # CUDA 支持
-│   └── nn/                 # 神经网络模块
-├── test/                    # 测试代码
-│   ├── cpp/                # C++ 测试
-│   └── *.py                # Python 测试
-├── build/                   # 构建产物
-└── docs/                    # 文档
+├── CMakeLists.txt           # Main build configuration
+├── setup.py                 # Python extension build
+├── Makefile                 # Convenient build interface
+├── pyproject.toml           # Project configuration
+├── csrc/                    # C++ source code
+│   ├── aten/               # Tensor library core
+│   │   ├── include/        # Header files
+│   │   └── src/            # Implementation files
+│   │       ├── ATen/       # Core tensor implementation
+│   │       └── TH/         # Low-level tensor operations
+│   ├── autograd/           # Automatic differentiation engine
+│   └── api/                # Python binding layer
+├── tiny_torch/                   # Python package
+│   ├── __init__.py         # Main module
+│   ├── autograd/           # Autograd Python interface
+│   ├── cuda/               # CUDA support
+│   └── nn/                 # Neural network modules
+├── test/                    # Test code
+│   ├── cpp/                # C++ tests
+│   └── *.py                # Python tests
+├── build/                   # Build artifacts
+└── docs/                    # Documentation
 ```
 
-### 核心模块说明
+### Core Module Descriptions
 
-#### 1. csrc/aten/ - 张量库核心
-- **ATen/core/** - 张量基础类型（Tensor, TensorImpl, Storage）
-- **ATen/native/** - 数学运算实现（CPU + CUDA）
-- **TH/** - 底层张量操作和内存管理
+#### 1. csrc/aten/ - Tensor Library Core
+- **ATen/core/** - Basic tensor types (Tensor, TensorImpl, Storage)
+- **ATen/native/** - Mathematical operation implementations (CPU + CUDA)
+- **TH/** - Low-level tensor operations and memory management
 
-#### 2. csrc/autograd/ - 自动微分引擎
-- **engine.cpp** - 反向传播引擎
-- **function.cpp** - 函数节点基类
-- **variable.cpp** - 可微分变量
+#### 2. csrc/autograd/ - Automatic Differentiation Engine
+- **engine.cpp** - Backpropagation engine
+- **function.cpp** - Function node base class
+- **variable.cpp** - Differentiable variables
 
-#### 3. csrc/api/ - Python 绑定层
-- **python_bindings.cpp** - pybind11 绑定入口
-- **tensor_api.cpp** - 张量 API 绑定
-- **autograd_api.cpp** - 自动微分 API 绑定
+#### 3. csrc/api/ - Python Binding Layer
+- **python_bindings.cpp** - pybind11 binding entry point
+- **tensor_api.cpp** - Tensor API bindings
+- **autograd_api.cpp** - Autograd API bindings
 
-## 构建系统
+## Build System
 
-### 快速开始
+### Quick Start
 
 ```bash
-# 清理环境
+# Clean environment
 make clean
 
-# 构建项目
+# Build project
 make build
 
-# 运行测试
+# Run tests
 make test
 
-# 诊断问题
+# Diagnose issues
 make diagnose
 ```
 
-### 环境要求
+### Environment Requirements
 
-- **操作系统**: Linux（专门优化）
-- **编译器**: GCC 7+ 或 Clang 6+
+- **Operating System**: Linux (specifically optimized)
+- **Compiler**: GCC 7+ or Clang 6+
 - **Python**: 3.8+
 - **CMake**: 3.18+
-- **CUDA**: 11.0+ （可选）
+- **CUDA**: 11.0+ (optional)
 
-### 构建配置
+### Build Configuration
 
-#### CMake 主要选项
+#### CMake Main Options
 ```cmake
 option(WITH_CUDA "Enable CUDA support" ON)
 option(WITH_OPENMP "Enable OpenMP support" ON)
@@ -104,148 +104,148 @@ option(WITH_MKL "Enable Intel MKL support" OFF)
 option(BUILD_TESTS "Build test suite" ON)
 ```
 
-#### 环境变量
+#### Environment Variables
 ```bash
-export WITH_CUDA=1          # 启用 CUDA
-export USE_NINJA=1          # 使用 Ninja 构建器（默认）
-export DEBUG=0              # 发布构建
-export VERBOSE=0            # 简洁输出
+export WITH_CUDA=1          # Enable CUDA
+export USE_NINJA=1          # Use Ninja builder (default)
+export DEBUG=0              # Release build
+export VERBOSE=0            # Concise output
 ```
 
-## 测试框架
+## Testing Framework
 
-### C++ 测试
+### C++ Tests
 ```bash
-# 构建并运行 C++ 测试
+# Build and run C++ tests
 cd build/cmake
 make tiny_torch_cpp_tests
 ./test/cpp/tiny_torch_cpp_tests
 ```
 
-### Python 测试
+### Python Tests
 ```bash
-# 运行所有测试
+# Run all tests
 pytest test/ -v
 
-# 运行 CUDA 测试
+# Run CUDA tests
 pytest test/ -v -m cuda
 
-# 运行特定测试
+# Run specific tests
 pytest test/test_tensor.py -v
 ```
 
-### 验证脚本
+### Verification Scripts
 ```bash
-# Phase 1.1 完整验证
+# Phase 1.1 complete verification
 python test/verify_phase1_1.py
 
-# 构建系统诊断
+# Build system diagnostics
 python tools/diagnose_build.py
 ```
 
-## 开发工作流
+## Development Workflow
 
-### 日常开发
+### Daily Development
 ```bash
-# 1. 修改代码后重新构建
+# 1. Rebuild after code changes
 make build
 
-# 2. 运行相关测试
+# 2. Run relevant tests
 pytest test/test_specific.py
 
-# 3. 检查构建状态
+# 3. Check build status
 make diagnose
 ```
 
-### 调试模式
+### Debug Mode
 ```bash
-# 启用调试构建
+# Enable debug build
 export DEBUG=1
 make clean && make build
 ```
 
-### 性能测试
+### Performance Testing
 ```bash
-# 运行基准测试
+# Run benchmarks
 python benchmarks/compare_with_pytiny_torch.py
 ```
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **CUDA 编译失败**
+1. **CUDA Compilation Failure**
    ```bash
-   # 检查 CUDA 环境
+   # Check CUDA environment
    nvcc --version
    echo $CUDA_HOME
    
-   # 禁用 CUDA 构建
+   # Disable CUDA build
    export WITH_CUDA=0
    make clean && make build
    ```
 
-2. **依赖缺失**
+2. **Missing Dependencies**
    ```bash
-   # 安装构建依赖
+   # Install build dependencies
    pip install -r requirements-dev.txt
    
-   # 检查系统依赖
+   # Check system dependencies
    python tools/check_env.py
    ```
 
-3. **链接错误**
+3. **Linking Errors**
    ```bash
-   # 清理重新构建
+   # Clean and rebuild
    make clean
    make build
    
-   # 检查库路径
+   # Check library paths
    ldd tiny_torch/_C*.so
    ```
 
-### 诊断工具
+### Diagnostic Tools
 
 ```bash
-# 综合诊断
+# Comprehensive diagnostics
 python3 tools/diagnose_build.py
 
-# 环境检查
+# Environment check
 python3 tools/check_env.py
 
-# 构建状态检查
+# Build status check
 make check-env
 ```
 
-## 代码标准
+## Code Standards
 
-### C++ 编码规范
-- **命名**: CamelCase 类名，snake_case 函数名
-- **命名空间**: `torch::`、`at::`、`c10::`
-- **头文件**: `#pragma once` 保护
-- **注释**: Doxygen 风格文档
+### C++ Coding Standards
+- **Naming**: CamelCase class names, snake_case function names
+- **Namespaces**: `torch::`, `at::`, `c10::`
+- **Header Files**: `#pragma once` guards
+- **Comments**: Doxygen-style documentation
 
-### Python API 设计
-- **模块**: 遵循 PyTorch API 兼容性
-- **函数**: 支持函数式和方法式调用
-- **类型**: 使用类型提示
-- **文档**: Google 风格 docstring
+### Python API Design
+- **Modules**: Follow PyTorch API compatibility
+- **Functions**: Support both functional and method-style calls
+- **Types**: Use type hints
+- **Documentation**: Google-style docstrings
 
-## 性能特性
+## Performance Features
 
-- **并行构建**: 默认使用 Ninja + 多核编译
-- **增量构建**: CMake 依赖跟踪优化
-- **缓存**: ccache 编译器缓存支持
-- **优化**: Release 模式 -O3 优化
+- **Parallel Build**: Default use of Ninja + multi-core compilation
+- **Incremental Build**: CMake dependency tracking optimization
+- **Caching**: ccache compiler cache support
+- **Optimization**: Release mode -O3 optimization
 
-## 相关文档
+## Related Documentation
 
-- `README.md` - 项目总览
-- `BUILD_COMMANDS_REFERENCE.md` - 构建命令参考
-- `CONTRIBUTING.md` - 贡献指南
-- `CHANGELOG.md` - 版本历史
+- `README.md` - Project overview
+- `BUILD_COMMANDS_REFERENCE.md` - Build command reference
+- `CONTRIBUTING.md` - Contribution guidelines
+- `CHANGELOG.md` - Version history
 
 ---
 
-**状态**: [COMPLETED] Phase 1.1 已完成  
-**下一步**: Phase 1.2 - 张量基础实现
+**Status**: [COMPLETED] Phase 1.1 completed  
+**Next Step**: Phase 1.2 - Tensor basic implementation

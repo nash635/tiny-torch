@@ -7,63 +7,63 @@
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
 ![Phase](https://img.shields.io/badge/Phase-1.1%20Complete-success.svg)
 
-Tiny-Torch 是一个从零开始实现的深度学习框架，严格参考 [PyTorch](https://github.com/pytorch/pytorch) 的架构设计和底层实现。本项目旨在通过重新实现 PyTorch 的核心组件，深入理解现代深度学习框架的底层机制。
+Tiny-Torch is a deep learning framework implemented from scratch, strictly following the architectural design and underlying implementation of [PyTorch](https://github.com/pytorch/pytorch). This project aims to provide deep understanding of modern deep learning framework internals through reimplementing PyTorch's core components.
 
-## 目录
+## Table of Contents
 
-- [项目状态](#项目状态)
-- [快速开始](#快速开始)
-- [附加特性](#附加特性)
-- [架构设计](#架构设计)
-- [开发路线图](#开发路线图)
-- [测试验证](#测试验证)
-- [构建说明](#构建说明)
-- [贡献指南](#贡献指南)
-- [学习价值](#学习价值)
-- [许可证](#许可证)
+- [Project Status](#project-status)
+- [Quick Start](#quick-start)
+- [Additional Features](#additional-features)
+- [Architecture Design](#architecture-design)
+- [Development Roadmap](#development-roadmap)
+- [Testing and Validation](#testing-and-validation)
+- [Build Instructions](#build-instructions)
+- [Contributing](#contributing)
+- [Learning Value](#learning-value)
+- [License](#license)
 
-## 项目状态
+## Project Status
 
-**当前版本**: Phase 1.1 [已完成]
+**Current Version**: Phase 1.1 [Completed]
 
-### 已完成功能
+### Completed Features
 
-- **完整构建系统** - CMake + Python setuptools双重构建支持
-- **C++核心库** - 成功编译的静态库 (`libtiny_torch_cpp.a`)
-- **Python扩展** - 可导入的Python模块 (`tiny_torch._C`)
-- **CUDA支持** - 6/6 CUDA源文件编译，GPU检测和管理
-- **CUDA自动检测** - 智能CUDA环境检测，无CUDA环境自动降级为CPU构建
-- **测试框架** - C++和Python测试环境完整搭建
-- **开发工具链** - 代码格式化、CI/CD、预提交钩子配置
+- **Complete Build System** - CMake + Python setuptools dual build support
+- **C++ Core Library** - Successfully compiled static library (`libtiny_torch_cpp.a`)
+- **Python Extension** - Importable Python module (`tiny_torch._C`)
+- **CUDA Support** - 6/6 CUDA source files compiled, GPU detection and management
+- **CUDA Auto-detection** - Intelligent CUDA environment detection, automatic fallback to CPU build when CUDA unavailable
+- **Testing Framework** - Complete C++ and Python testing environment setup
+- **Development Toolchain** - Code formatting, CI/CD, pre-commit hooks configuration
 
-### 开发进度
+### Development Progress
 
 ```
-Phase 1: 核心基础设施    ████████████████████████████████ 100% [完成]
-├─ 1.1 构建系统设置     ████████████████████████████████ 100% [完成]
-├─ 1.2 张量核心库       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [开发中]
-└─ 1.3 底层张量实现     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [计划中]
+Phase 1: Core Infrastructure ████████████████████████████████ 100% [Completed]
+├─ 1.1 Build System Setup   ████████████████████████████████ 100% [Completed]
+├─ 1.2 Tensor Core Library  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [In Progress]
+└─ 1.3 Low-level Tensor Impl ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [Planned]
 
-Phase 2: 核心算子实现    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [计划中]
-Phase 3: 自动微分引擎    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [计划中]  
-Phase 4: Python前端     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [计划中]
-Phase 5: 高级特性       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [计划中]
+Phase 2: Core Operators      ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [Planned]
+Phase 3: Autograd Engine     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [Planned]
+Phase 4: Python Frontend     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [Planned]
+Phase 5: Advanced Features   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   0% [Planned]
 
-总体进度: ████████░░░░░░░░░░░░░░░░░░░░░░ 20%
+Overall Progress: ████████░░░░░░░░░░░░░░░░░░░░░░ 20%
 ```
 
-## 快速开始
+## Quick Start
 
-### 环境要求
+### Environment Requirements
 
 - Python 3.8+
 - CMake 3.18+
-- C++17编译器
-- CUDA 11.0+ (可选，支持自动检测)
+- C++17 compiler
+- CUDA 11.0+ (optional, auto-detection supported)
 
-### 安装方式
+### Installation Methods
 
-#### 方式一：一键安装 (推荐)
+#### Method 1: One-click Installation (Recommended)
 
 ```bash
 git clone https://github.com/nash635/tiny-torch.git
@@ -71,22 +71,22 @@ cd tiny-torch
 make install
 ```
 
-#### 方式二：Docker环境 (推荐新手)
+#### Method 2: Docker Environment (Recommended for Beginners)
 
 ```bash
-# 使用预构建镜像
+# Use pre-built image
 docker pull crpi-rxpfp3shzt1yww56.cn-hangzhou.personal.cr.aliyuncs.com/tiny-torch/tiny-torch-gpu:latest
 
-# 启动开发环境
+# Start development environment
 docker run --gpus all -it --rm \
   -v $(pwd):/workspace \
   crpi-rxpfp3shzt1yww56.cn-hangzhou.personal.cr.aliyuncs.com/tiny-torch/tiny-torch-gpu:latest
 
-# 在容器内构建
+# Build inside container
 cd /workspace && make install
 ```
 
-#### 方式三：分步安装
+#### Method 3: Step-by-step Installation
 
 ```bash
 pip install -r requirements.txt
@@ -94,134 +94,134 @@ make build
 pip install -e .
 ```
 
-### 验证安装
+### Installation Verification
 
 ```bash
-# 快速验证
-python -c "import tiny_torch; print('安装成功:', tiny_torch.__version__)"
+# Quick verification
+python -c "import tiny_torch; print('Installation successful:', tiny_torch.__version__)"
 
-# 完整验证
+# Complete verification
 python test/verify_phase1_1.py
 ```
-## 附加特性
+## Additional Features
 
-### CUDA自动检测
+### CUDA Auto-detection
 
-Tiny-Torch支持智能CUDA环境检测，无需手动配置：
+Tiny-Torch supports intelligent CUDA environment detection without manual configuration:
 
 ```bash
-# 自动检测CUDA可用性
+# Auto-detect CUDA availability
 python setup.py build_ext --inplace
 
-# 手动控制CUDA设置
-WITH_CUDA=1 python setup.py build_ext --inplace  # 强制启用（有回退）
-WITH_CUDA=0 python setup.py build_ext --inplace  # 强制禁用
+# Manual CUDA control
+WITH_CUDA=1 python setup.py build_ext --inplace  # Force enable (with fallback)
+WITH_CUDA=0 python setup.py build_ext --inplace  # Force disable
 
-# 测试CUDA检测逻辑
+# Test CUDA detection logic
 python test_cuda_detection.py
 ```
 
-构建输出说明：
-- `"CUDA automatically detected and enabled"` - 检测到CUDA并启用
-- `"CUDA not available, using CPU-only build"` - 无CUDA，使用CPU构建
-- `"Warning: CUDA requested but nvcc not found..."` - 请求CUDA但不可用，自动回退
+Build output explanations:
+- `"CUDA automatically detected and enabled"` - CUDA detected and enabled
+- `"CUDA not available, using CPU-only build"` - No CUDA, using CPU build
+- `"Warning: CUDA requested but nvcc not found..."` - CUDA requested but unavailable, auto fallback
 
-详细信息：[CUDA自动检测文档](docs/CUDA_AUTO_DETECTION.md)
+Details: [CUDA Auto-detection Documentation](docs/CUDA_AUTO_DETECTION.md)
 
-### 当前可用功能
+### Currently Available Features
 
 ```python
 import tiny_torch
 
-# 基础功能 (Phase 1.1)
+# Basic features (Phase 1.1)
 print(tiny_torch.__version__)              # 0.1.0
-print(tiny_torch.cuda.is_available())      # CUDA检测
-print(tiny_torch.cuda.device_count())      # GPU数量
+print(tiny_torch.cuda.is_available())      # CUDA detection
+print(tiny_torch.cuda.device_count())      # GPU count
 
-# 模块结构已就位
+# Module structure in place
 import tiny_torch.nn
 import tiny_torch.optim  
 import tiny_torch.autograd
 
-# 张量接口框架 (Phase 1.2将实现具体功能)
+# Tensor interface framework (Phase 1.2 will implement functionality)
 try:
     tensor = tiny_torch.tensor([1, 2, 3])
 except NotImplementedError:
-    print("张量接口已就位，等待Phase 1.2实现")
+    print("Tensor interface ready, awaiting Phase 1.2 implementation")
 ```
 
-## 架构设计
+## Architecture Design
 
-### 项目目标
+### Project Goals
 
-- **严格参考PyTorch** - 遵循PyTorch的API设计和实现模式
-- **底层优化** - 核心算子使用C++/CUDA实现，确保性能
-- **教育导向** - 提供清晰的代码注释和实现文档
-- **模块化设计** - 采用PyTorch的分层架构，便于学习和扩展
+- **Strictly Follow PyTorch** - Follow PyTorch API design and implementation patterns
+- **Low-level Optimization** - Core operators implemented in C++/CUDA for performance
+- **Education-oriented** - Provide clear code comments and implementation documentation
+- **Modular Design** - Adopt PyTorch layered architecture for learning and extension
 
-### 目录结构
+### Directory Structure
 
 ```
 tiny-torch/
-├── csrc/                      # C++/CUDA源码
-│   ├── aten/                  # 张量库 (参考pytorch/aten)
-│   ├── autograd/              # 自动微分引擎
-│   └── api/                   # Python C API绑定
-├── tiny_torch/                # Python前端
-│   ├── nn/                    # 神经网络模块
-│   ├── optim/                 # 优化器
-│   ├── autograd/              # 自动微分接口
-│   └── cuda/                  # CUDA支持
-├── test/                      # 测试套件
-│   ├── cpp/                   # C++测试
-│   └── *.py                   # Python测试
-└── docs/                      # 文档
+├── csrc/                      # C++/CUDA source code
+│   ├── aten/                  # Tensor library (reference pytorch/aten)
+│   ├── autograd/              # Automatic differentiation engine
+│   └── api/                   # Python C API bindings
+├── tiny_torch/                # Python frontend
+│   ├── nn/                    # Neural network modules
+│   ├── optim/                 # Optimizers
+│   ├── autograd/              # Autograd interface
+│   └── cuda/                  # CUDA support
+├── test/                      # Test suite
+│   ├── cpp/                   # C++ tests
+│   └── *.py                   # Python tests
+└── docs/                      # Documentation
 ```
 
-## 开发路线图
+## Development Roadmap
 
-### Phase 1: 核心基础设施 [已完成]
-- **1.1 构建系统** [完成] - CMake、Python扩展、CUDA支持
-- **1.2 张量核心** [开发中] - Tensor、TensorImpl、Storage类
-- **1.3 底层实现** [计划中] - 内存管理、设备抽象、类型系统
+### Phase 1: Core Infrastructure [Completed]
+- **1.1 Build System** [Completed] - CMake, Python extensions, CUDA support
+- **1.2 Tensor Core** [In Progress] - Tensor, TensorImpl, Storage classes
+- **1.3 Low-level Implementation** [Planned] - Memory management, device abstraction, type system
 
-### Phase 2: 核心算子 [计划中]
-- **CPU算子** - 基础运算、线性代数、激活函数
-- **CUDA算子** - GPU内核、内存优化、多GPU支持
-- **算子注册** - 动态分发、设备无关接口
+### Phase 2: Core Operators [Planned]
+- **CPU Operators** - Basic operations, linear algebra, activation functions
+- **CUDA Operators** - GPU kernels, memory optimization, multi-GPU support
+- **Operator Registration** - Dynamic dispatch, device-agnostic interfaces
 
-### Phase 3: 自动微分 [计划中]
-- **计算图** - 动态图构建、节点管理
-- **反向传播** - 梯度计算、链式法则
-- **分布式梯度** - 梯度同步、All-Reduce原语
-- **高级特性** - 高阶梯度、JIT编译
+### Phase 3: Autograd [Planned]
+- **Computation Graph** - Dynamic graph construction, node management
+- **Backpropagation** - Gradient computation, chain rule
+- **Distributed Gradients** - Gradient synchronization, All-Reduce primitives
+- **Advanced Features** - Higher-order gradients, JIT compilation
 
-### Phase 4: 神经网络模块 [计划中]
-- **Module基类** - 参数管理、状态同步
-- **卷积层** - Conv2d、BatchNorm2d、池化层  
-- **ResNet组件** - BasicBlock、Bottleneck、ResNet架构
-- **损失函数** - CrossEntropy、MSE等
+### Phase 4: Neural Network Modules [Planned]
+- **Module基类** - Parameter management, state synchronization
+- **卷积层** - Conv2d, BatchNorm2d, pooling layers  
+- **ResNet组件** - BasicBlock, Bottleneck, ResNet architecture
+- **损失函数** - CrossEntropy, MSE, etc.
 
-### Phase 5: 分布式训练框架 [重点新增]
-- **通信后端** - NCCL集成、进程组管理
+### Phase 5: Distributed Training Framework [Key Addition]
+- **通信后端** - NCCL integration, process group management
 - **数据并行** - DistributedDataParallel (DDP)
-- **模型并行** - 大模型分片、管道并行
-- **混合并行** - 数据+模型并行策略
+- **模型并行** - Large model sharding, pipeline parallelism
+- **混合并行** - Data + model parallel strategies
 
-### Phase 6: 优化器与工具生态 [计划中]
-- **优化器** - SGD、Adam、分布式优化器
-- **数据加载** - DistributedSampler、多进程加载
-- **模型保存** - 分布式检查点、模型分片
+### Phase 6: Optimizers and Tools Ecosystem [Planned]
+- **优化器** - SGD, Adam, distributed optimizers
+- **数据加载** - DistributedSampler, multi-process loading
+- **模型保存** - Distributed checkpoints, model sharding
 
-### Phase 7: ResNet50验证 [最终目标]
-- **ImageNet训练** - 多机多卡ResNet50训练
-- **性能对标** - 与PyTorch性能对比
-- **准确性验证** - Top-1准确率 > 75%
+### Phase 7: ResNet50 Validation [Final Goal]
+- **ImageNet训练** - Multi-node multi-GPU ResNet50 training
+- **性能对标** - Performance comparison with PyTorch
+- **Accuracy validation** - Top-1准确率 > 75%
 
 
-## 测试验证
+## Testing and Validation
 
-### 快速验证
+### Quick Verification
 
 ```bash
 # 完整测试套件（推荐）
@@ -234,7 +234,7 @@ python -c "import tiny_torch; print('导入成功')"
 make diagnose
 ```
 
-### 详细测试
+### Detailed Testing
 
 ```bash
 # Python测试套件
@@ -250,14 +250,14 @@ cd build/cmake && ./test/cpp/tiny_torch_cpp_tests
 python test/verify_phase1_1.py
 ```
 
-### 测试覆盖率
+### Test Coverage
 
 - **构建系统**: 100% (CMake + Ninja + setuptools)
 - **Python集成**: 95% (模块导入、错误处理、API)  
 - **CUDA支持**: 90% (编译、运行时、设备管理)
 - **基础架构**: 95% (项目结构、依赖管理)
 
-### 故障排除
+### Troubleshooting
 
 ```bash
 # 构建问题诊断
@@ -270,9 +270,9 @@ python tools/check_env.py
 make clean && make install
 ```
 
-## 构建说明
+## Build Instructions
 
-### 构建命令
+### Build Commands
 
 | 命令 | 功能 | 适用场景 |
 |------|------|----------|
@@ -282,7 +282,7 @@ make clean && make install
 | `make clean` | 清理 | 解决构建问题 |
 | `make diagnose` | 诊断 | 排查构建问题 |
 
-### 构建选项
+### Build Options
 
 ```bash
 # 环境变量控制构建
@@ -292,7 +292,7 @@ USE_NINJA=1 make install     # 强制使用Ninja
 VERBOSE=1 make install       # 详细输出
 ```
 
-### 构建产物
+### Build Artifacts
 
 | 产物 | 位置 | 说明 |
 |------|------|------|
@@ -301,9 +301,9 @@ VERBOSE=1 make install       # 详细输出
 | **CUDA内核** | `build/cmake/*.cu.o` | 编译后的CUDA对象文件 |
 | **测试程序** | `build/cmake/test/cpp/tiny_torch_cpp_tests` | C++测试程序 |
 
-## 贡献指南
+## Contributing
 
-### 如何贡献
+### How to Contribute
 
 1. Fork本项目
 2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
@@ -311,34 +311,34 @@ VERBOSE=1 make install       # 详细输出
 4. 推送分支 (`git push origin feature/amazing-feature`)
 5. 创建Pull Request
 
-### 开发规范
+### Development Standards
 
 - **C++**: 遵循PyTorch代码风格
 - **Python**: 遵循PEP 8规范
 - **测试**: 确保所有测试通过
 - **文档**: 添加必要的注释和文档
 
-## 学习价值
+## Learning Value
 
 通过实现Tiny-Torch，深入掌握：
 
-- **底层系统设计** - 内存管理、设备抽象、类型系统
+- **底层系统设计** - Memory management, device abstraction, type system
 - **计算图和自动微分** - 动态图构建、反向传播算法
 - **高性能计算** - SIMD优化、GPU编程、内存层次
 - **系统集成** - Python C扩展、构建系统、API设计
 
-## 许可证
+## License
 
 本项目采用 **Apache License 2.0**，确保开源友好和商业兼容。
 
-### 许可证特点
+### License特点
 
 - **开源友好**: 允许自由使用、修改和分发
 - **商业兼容**: 可用于商业项目，包括专利保护
 - **学术研究**: 适合教育和研究用途
 - **现代标准**: 广泛采用的现代开源许可证
 
-### 相关文件
+### Related Files
 
 - [LICENSE](LICENSE) - 完整许可证文本
 - [CONTRIBUTING.md](CONTRIBUTING.md) - 贡献指南

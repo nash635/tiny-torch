@@ -1,12 +1,12 @@
 # Memory Debug Tools Requirements
-# 显存调试工具依赖项
+# Memory debugging tools dependencies
 
-# 核心依赖
+# Core dependencies
 numpy>=1.19.0
 matplotlib>=3.3.0  
 psutil>=5.7.0
 
-# 可选依赖（用于扩展功能）
-# pandas>=1.1.0      # 数据分析
-# jupyter>=1.0.0     # Jupyter集成
-# tensorboard>=2.4.0 # TensorBoard可视化
+# Optional dependencies (for extended functionality)
+# pandas>=1.1.0      # Data analysis
+# jupyter>=1.0.0     # Jupyter integration
+# tensorboard>=2.4.0 # TensorBoard visualization

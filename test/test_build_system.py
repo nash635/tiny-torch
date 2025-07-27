@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 test_build_system.py
-构建系统的基础测试
+
+Build System Tests
+Basic tests for the build system
 """
 
 import os
@@ -9,12 +11,12 @@ import sys
 import subprocess
 from pathlib import Path
 
-# 添加项目根目录到Python路径
+# Add project root directory to Python path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-class BuildSystemTestFailure(Exception):
-    """构建系统测试失败异常"""
+class BuildSystemTestError(Exception):
+    """Build system test failure exception"""
     pass
 
 def test_import_torch():

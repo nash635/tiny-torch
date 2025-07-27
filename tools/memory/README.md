@@ -1,105 +1,105 @@
 # Memory Debug Tools for Tiny Torch
-# 显存调试工具集
+# Memory Debug Tools
 
-这是一套专为 Tiny Torch 设计的显存调试工具，帮助开发者排查和解决分布式训练中的显存问题。
+This is a comprehensive memory debugging toolkit designed specifically for Tiny Torch, helping developers troubleshoot and resolve GPU memory issues in distributed training.
 
-## 主要功能
+## Main Features
 
-### 统一接口
-- **MemoryDebugger**: 统一的调试接口，整合所有功能
-- **命令行工具**: 支持 `python -m tools.memory` 调用
-- **简化配置**: 开箱即用，最小化配置
+### Unified Interface
+- **MemoryDebugger**: Unified debugging interface integrating all features
+- **Command-line tools**: Support for `python -m tools.memory` invocation
+- **Simplified configuration**: Out-of-the-box, minimal configuration
 
-### 核心功能
-1. **显存分析** - 实时监控GPU显存使用情况，生成详细报告
-2. **OOM检测** - 智能预警系统，预测OOM发生时间
-3. **内存泄漏检测** - 检测显存和Python内存泄漏
-4. **碎片分析** - 分析显存碎片化程度（基础版本）
-5. **分布式监控** - 跨节点显存使用协调监控（扩展功能）
+### Core Features
+1. **GPU memory analysis** - Real-time monitoring of GPU memory usage, generate detailed reports
+2. **OOM detection** - Intelligent warning system, predict OOM occurrence time
+3. **Memory leak detection** - Detect GPU memory and Python memory leaks
+4. **Fragmentation analysis** - Analyze GPU memory fragmentation (basic version)
+5. **Distributed monitoring** - Cross-node GPU memory coordination monitoring (extended feature)
 
-## 快速开始
+## Quick Start
 
-### 安装依赖
+### Install Dependencies
 ```bash
 pip install numpy matplotlib psutil
-# 或者
+# or
 pip install -r requirements.txt
 ```
 
-### Python API 使用
+### Python API Usage
 
-#### 1. 统一接口（推荐）
+#### 1. Unified Interface (Recommended)
 ```python
 from tools.memory import MemoryDebugger
 
-# 启动全面监控
+# Start comprehensive monitoring
 debugger = MemoryDebugger()
 debugger.start_monitoring()
 
-# 训练代码...
+# Training code...
 # your_training_code()
 
-# 停止监控并获取报告
+# Stop monitoring and get report
 debugger.stop_monitoring()
 report = debugger.get_status_report()
-print(f"监控摘要: {report}")
+print(f"Monitoring summary: {report}")
 ```
 
-#### 2. 单独使用各工具
+#### 2. Use Individual Tools
 ```python
 from tools.memory import MemoryProfiler, OOMDetector
 
-# 内存分析
+# Memory analysis
 profiler = MemoryProfiler(sampling_interval=0.1)
 profiler.start_monitoring()
-# ... 运行一段时间后
+# ... after running for a while
 profiler.stop_monitoring()
 profiler.generate_report('memory_report.json')
 
-# OOM检测
+# OOM detection
 detector = OOMDetector(threshold=85.0)
 detector.start_monitoring()
-# ... 自动预警
+# ... automatic warnings
 ```
 
-### 命令行使用
+### Command Line Usage
 
-#### 1. 内存分析
+#### 1. Memory Analysis
 ```bash
-# 监控60秒并生成报告
+# Monitor for 60 seconds and generate report
 python -m tools.memory profile --duration 60 --output profile.json
 
-# 持续监控特定GPU
+# Continuously monitor specific GPUs
 python -m tools.memory profile --devices 0 1 --duration 0
 ```
 
-#### 2. OOM监控
+#### 2. OOM Monitoring
 ```bash
-# 85%阈值OOM监控
+# OOM monitoring with 85% threshold
 python -m tools.memory oom --threshold 85 --monitor
 
-# 监控特定设备
+# Monitor specific devices
 python -m tools.memory oom --devices 0 --threshold 90
 ```
 
-#### 3. 内存泄漏检测
+#### 3. Memory leak detection
 ```bash
-# 检查内存泄漏
+# Check for memory leaks
 python -m tools.memory leak --check --threshold 100
 ```
 
-#### 4. 全面监控
+#### 4. Comprehensive Monitoring
 ```bash
-# 启动所有监控功能
+# Start all monitoring features
 python -m tools.memory monitor --all
 
-# 监控指定时长
+# Monitor for specified duration
 python -m tools.memory monitor --all --duration 300
 ```
 
-## 输出示例
+## Output Examples
 
-### 内存状态报告
+### Memory Status Report
 ```json
 {
   "timestamp": "2025-01-15T10:30:00",
@@ -128,22 +128,22 @@ python -m tools.memory monitor --all --duration 300
 
 ### OOM预警示例
 ```
-[WARNING] OOM警告: GPU 0
-   风险等级: high
-   当前使用率: 87.3%
-   预测OOM时间: 45.2秒后
-   置信度: 0.82
-   建议: 准备释放缓存
-   建议: 考虑减少batch size
+[WARNING] OOM Warning: GPU 0
+   Risk Level: high
+   Current Usage: 87.3%
+   Predicted OOM Time: 45.2seconds later
+   Confidence: 0.82
+   Recommendation: Prepare to release cache
+   Recommendation: Consider reducing batch size
 ```
 
-## 高级配置
+## Advanced Configuration
 
-### 自定义OOM回调
+### Custom OOM Callbacks
 ```python
 def custom_oom_callback(prediction):
     if prediction.risk_level.value == "critical":
-        # 执行紧急操作，如减少batch size
+        # Execute emergency operations, such as reducing batch size
         print(f"Critical OOM risk on GPU {prediction.device_id}! Taking action...")
         # tiny_torch.cuda.empty_cache()
         # reduce_batch_size()
@@ -152,40 +152,40 @@ detector = OOMDetector(warning_callback=custom_oom_callback)
 detector.start_monitoring()
 ```
 
-### 显存优化策略
-1. **基于分析结果调整batch size**
-2. **使用gradient checkpointing减少峰值内存**
-3. **定期清理CUDA缓存**: `tiny_torch.cuda.empty_cache()`
-4. **使用混合精度训练**: 减少内存使用
-5. **优化数据加载**: 避免数据预处理占用过多内存
+### GPU Memory Optimization Strategies
+1. **Adjust batch size based on analysis results**
+2. **Use gradient checkpointing to reduce peak memory**
+3. **Regularly clear CUDA cache**: `tiny_torch.cuda.empty_cache()`
+4. **Use mixed precision training**: reduce memory usage
+5. **Optimize data loading**: avoid data preprocessing taking up too much memory
 
-## 技术说明
+## Technical Details
 
-### 架构设计
-- **模块化设计**: 每个功能独立，可单独使用
-- **统一接口**: MemoryDebugger 提供一站式解决方案
-- **轻量级**: 最小化对训练性能的影响
-- **可扩展**: 支持自定义回调和策略
+### Architecture Design
+- **Modular design**: each function is independent and can be used separately
+- **Unified interface**: MemoryDebugger provides one-stop solution
+- **Lightweight**: minimize impact on training performance
+- **Extensible**: Support for自定义回调和策略
 
-### 依赖说明
-- **numpy**: 数值计算和统计分析
-- **matplotlib**: 生成内存使用图表
-- **psutil**: 系统进程监控
-- **标准库**: threading, json, subprocess等
+### Dependencies
+- **numpy**: numerical computation and statistical analysis
+- **matplotlib**: generate memory usage charts
+- **psutil**: system process monitoring
+- **Standard library**: threading, json, subprocess等
 
-### 性能影响
-- 默认采样间隔: 0.1秒（可调节）
-- 内存开销: 每设备约1-5MB历史数据
-- CPU占用: 通常 < 1%
+### Performance Impact
+- Default sampling interval: 0.1秒（adjustable）
+- Memory overhead: approximately per device1-5MBhistorical data
+- CPUusage: usually < 1%
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
-1. **nvidia-smi 不可用**: 检查NVIDIA驱动安装
-2. **导入错误**: 确保安装了所需依赖
-3. **权限问题**: 某些系统监控功能需要适当权限
+### Common Issues
+1. **nvidia-smi not available**: check NVIDIA driver installation
+2. **import error**: ensure required dependencies are installed
+3. **permission issues**: some system monitoring features require appropriate permissions
 
-### 调试模式
+### Debug Mode
 ```python
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -194,18 +194,18 @@ debugger = MemoryDebugger()
 debugger.start_monitoring()
 ```
 
-## 版本历史
+## Version History
 
 ### v1.0.0
-- 整合所有功能到单一文件
-- 简化API和命令行接口
-- 优化性能和稳定性
-- 完善文档和示例
+- Integrate all features into a single file
+- Simplify API and command line interface
+- Optimize performance and stability
+- Improve documentation and examples
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 和 Pull Request 来改进这个工具集。
+Welcome to submit Issues and Pull Requests to improve this toolkit.
 
-## 许可证
+## License
 
-本项目遵循与 Tiny Torch 主项目相同的许可证。
+This project follows the same license as the main Tiny Torch project.
