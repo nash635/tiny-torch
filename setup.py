@@ -25,7 +25,7 @@ URL = "https://github.com/your-username/tiny-torch"
 
 # Build configuration
 DEBUG = os.getenv("DEBUG", "0") == "1"
-WITH_CUDA = os.getenv("WITH_CUDA", "1") == "1"
+WITH_CUDA = os.getenv("WITH_CUDA", "1") == "1"  # Default to True, but will be auto-detected
 WITH_MKL = os.getenv("WITH_MKL", "0") == "1"
 WITH_OPENMP = os.getenv("WITH_OPENMP", "1") == "1"
 VERBOSE = os.getenv("VERBOSE", "0") == "1"
@@ -264,6 +264,49 @@ def get_cuda_version():
         return None
     return None
 
+def check_cuda_available():
+    """检查CUDA是否可用"""
+    try:
+        # 检查nvcc是否存在
+        result = subprocess.run(
+            ["nvcc", "--version"], 
+            capture_output=True, 
+            text=True, 
+            check=True,
+            timeout=10
+        )
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+
+def auto_detect_cuda():
+    """自动检测是否应该启用CUDA"""
+    global WITH_CUDA
+    
+    # 如果环境变量明确设置了WITH_CUDA=0，则禁用CUDA
+    if os.getenv("WITH_CUDA", "").lower() in ["0", "false", "off", "no"]:
+        WITH_CUDA = False
+        print("CUDA disabled by environment variable")
+        return
+    
+    # 如果环境变量明确设置了WITH_CUDA=1，则尝试启用CUDA
+    if os.getenv("WITH_CUDA", "").lower() in ["1", "true", "on", "yes"]:
+        if check_cuda_available():
+            WITH_CUDA = True
+            print("CUDA enabled by environment variable and is available")
+        else:
+            WITH_CUDA = False
+            print("Warning: CUDA requested by environment variable but nvcc not found. Falling back to CPU-only build.")
+        return
+    
+    # 如果没有明确设置，则自动检测
+    if check_cuda_available():
+        WITH_CUDA = True
+        print("CUDA automatically detected and enabled")
+    else:
+        WITH_CUDA = False
+        print("CUDA not available, using CPU-only build")
+
 def use_cmake_build():
     """检查是否应该使用CMake构建 (当项目变复杂时)"""
     # 当源文件数量超过阈值时，使用CMake+ninja构建
@@ -456,6 +499,9 @@ class CustomBuildExt(build_ext):
         super().run()
 
 if __name__ == "__main__":
+    # Auto-detect CUDA availability before any other checks
+    auto_detect_cuda()
+    
     check_env()
     
     # 如果源文件较多或需要CUDA支持，使用CMake构建

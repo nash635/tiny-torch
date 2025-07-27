@@ -122,25 +122,46 @@ execute_process(
 list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
 find_package(pybind11 CONFIG REQUIRED)
 
-# CUDA support
+# CUDA support with robust fallback
 if(WITH_CUDA)
-    enable_language(CUDA)
-    find_package(CUDAToolkit REQUIRED)
+    # Use CMake's CheckLanguage module for safer CUDA detection
+    include(CheckLanguage)
+    check_language(CUDA)
     
-    if(NOT DEFINED CMAKE_CUDA_STANDARD)
-        set(CMAKE_CUDA_STANDARD 17)
-        set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+    if(CMAKE_CUDA_COMPILER)
+        message(STATUS "CUDA compiler found: ${CMAKE_CUDA_COMPILER}")
+        enable_language(CUDA)
+        
+        # Find CUDAToolkit
+        find_package(CUDAToolkit QUIET)
+        if(CUDAToolkit_FOUND)
+            if(NOT DEFINED CMAKE_CUDA_STANDARD)
+                set(CMAKE_CUDA_STANDARD 17)
+                set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+            endif()
+            
+            # CUDA flags
+            set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler -fPIC")
+            set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr")
+            
+            # Find cuBLAS and cuDNN
+            find_library(CUBLAS_LIBRARIES cublas HINTS ${CUDAToolkit_LIBRARY_DIR})
+            find_library(CUDNN_LIBRARIES cudnn HINTS ${CUDAToolkit_LIBRARY_DIR})
+            
+            add_definitions(-DWITH_CUDA)
+            message(STATUS "CUDA support enabled successfully")
+        else()
+            message(WARNING "CUDA compiler found but CUDAToolkit not available. Disabling CUDA support.")
+            set(WITH_CUDA OFF)
+        endif()
+    else()
+        message(WARNING "CUDA was requested but no CUDA compiler found. Disabling CUDA support.")
+        set(WITH_CUDA OFF)
     endif()
-    
-    # CUDA flags
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler -fPIC")
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr")
-    
-    # Find cuBLAS and cuDNN
-    find_library(CUBLAS_LIBRARIES cublas HINTS ${CUDAToolkit_LIBRARY_DIR})
-    find_library(CUDNN_LIBRARIES cudnn HINTS ${CUDAToolkit_LIBRARY_DIR})
-    
-    add_definitions(-DWITH_CUDA)
+endif()
+
+if(NOT WITH_CUDA)
+    message(STATUS "Building without CUDA support")
 endif()
 
 # OpenMP support
