@@ -1,9 +1,9 @@
-# Makefile for Tiny-Torch (参考 pytorch/Makefile)
-# 简化的构建接口，方便开发者使用
+# Makefile for Tiny-Torch (reference pytorch/Makefile)
+# Simplified build interface for developer convenience
 
 .PHONY: help clean build install test lint format docs benchmark
 
-# 默认目标
+# Default target
 help:
 	@echo "Tiny-Torch Build System"
 	@echo "======================="
@@ -33,7 +33,7 @@ help:
 	@echo "  USE_NINJA=1   - Force Ninja backend"
 	@echo "  VERBOSE=1      - Verbose output"
 
-# 清理构建产物
+# Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
 	rm -rf build/
@@ -47,17 +47,17 @@ clean:
 	find . -name "*.so" -delete
 	@echo "Clean completed."
 
-# 诊断构建问题
+# Diagnose build issues
 diagnose:
 	@echo "Running build diagnostics..."
 	python3 tools/diagnose_build.py
 
-# 构建项目
+# Build project
 build:
 	@echo "Building Tiny-Torch..."
 	python3 setup.py build_ext --inplace
 
-# 安装项目 (改进版本处理多个.egg-info目录问题)
+# Install project (improved version handles multiple .egg-info directories issue)
 install: clean
 	@echo "Installing Tiny-Torch (with cleanup)..."
 	@if [ -f /.dockerenv ] || [ -n "$(CONTAINER)" ]; then \

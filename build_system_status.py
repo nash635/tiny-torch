@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 Tiny-Torch Phase 1.1 Build System Status Report
-验证构建系统集成并生成状态报告
+
+Build System Status Reporter
+Validate build system integration and generate status report
 """
 
 import os
@@ -25,8 +27,8 @@ def check_status(condition, message):
     print(f"  {status} {message}")
     return condition
 
-def check_tool(cmd, name):
-    """检查工具是否可用"""
+def check_command(cmd, name):
+    """Check if a tool is available"""
     try:
         result = subprocess.run([cmd, "--version"], capture_output=True, text=True, timeout=5)
         if result.returncode == 0:
@@ -44,16 +46,14 @@ def main():
     print(f"Generated: {platform.platform()}")
     print(f"Python: {sys.version}")
     
-    # 1. 环境检查
+    # 1. Environment check
     print_section("1. Build Environment")
     
     python_ok = check_status(sys.version_info >= (3, 7), f"Python >= 3.7 (current: {sys.version_info[:2]})")
-    cmake_ok = check_tool("cmake", "CMake")
-    make_ok = check_tool("make", "Make") 
-    ninja_ok = check_tool("ninja", "Ninja")
-    gcc_ok = check_tool("gcc", "GCC")
-    
-    # 2. 项目文件检查
+    cmake_ok = check_command("cmake", "CMake")
+    make_ok = check_command("make", "Make")
+    ninja_ok = check_command("ninja", "Ninja")
+    gcc_ok = check_command("gcc", "GCC")    # 2. Project file check
     print_section("2. Project Structure")
     
     project_files = {
@@ -69,7 +69,7 @@ def main():
         check_status(exists, f"{file} - {desc}")
         all_files_ok &= exists
     
-    # 3. 源码结构
+    # 3. Source structure
     print_section("3. Source Code Structure")
     
     source_dirs = {
@@ -92,10 +92,10 @@ def main():
         else:
             check_status(False, f"{dir_path} - {desc}")
     
-    # 4. 构建系统分析
+    # 4. Build system analysis
     print_section("4. Build System Analysis")
     
-    # 检查 Ninja 集成
+    # Check Ninja integration
     ninja_integrated = False
     if Path("setup.py").exists():
         with open("setup.py", "r") as f:
@@ -104,7 +104,7 @@ def main():
     
     check_status(ninja_integrated, "Ninja integration in setup.py")
     
-    # 检查 CMake Ninja 支持
+    # Check CMake Ninja support
     cmake_ninja_support = False
     if Path("CMakeLists.txt").exists():
         with open("CMakeLists.txt", "r") as f:
@@ -113,10 +113,10 @@ def main():
     
     check_status(cmake_ninja_support, "CMake Ninja optimizations")
     
-    # 5. 构建测试
+    # 5. Build tests
     print_section("5. Build System Test")
     
-    # 创建简单测试
+    # Create simple test
     test_dir = Path("build/status_test")
     if test_dir.exists():
         shutil.rmtree(test_dir)

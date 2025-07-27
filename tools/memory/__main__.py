@@ -1,6 +1,6 @@
 """
-Memory Debug Tools - 命令行入口点
-支持 python -m tools.memory 调用
+Memory Debug Tools - Command line entry point
+Supports python -m tools.memory invocation
 """
 
 from .memory_debug import main
