@@ -37,6 +37,10 @@ jobs:
     
     - name: Build project
       run: |
+        # Show CUDA detection info
+        echo "Checking for CUDA availability..."
+        which nvcc || echo "nvcc not found"
+        # Let setup.py auto-detect CUDA availability
         python setup.py build_ext --inplace
         # Alternative: make build
     
@@ -74,9 +78,13 @@ jobs:
       run: |
         mkdir -p build
         cd build
+        # Show CUDA detection info
+        echo "Checking for CUDA availability..."
+        which nvcc || echo "nvcc not found"
         # Set pybind11 path explicitly
         export pybind11_DIR=$(python -c "import pybind11; print(pybind11.get_cmake_dir())")
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_CUDA=OFF -Dpybind11_DIR=$pybind11_DIR
+        # Let CMake auto-detect CUDA availability instead of forcing it off
+        cmake .. -DCMAKE_BUILD_TYPE=Release -Dpybind11_DIR=$pybind11_DIR
     
     - name: Build
       run: |
