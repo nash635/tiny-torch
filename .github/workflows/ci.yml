@@ -69,7 +69,7 @@ jobs:
 
   # Extended tests (only run on schedule or specific branches)
   test-extended:
-    if: github.event_name == 'schedule' || contains(github.ref, 'main') || contains(github.ref, 'master')
+    if: github.event_name == 'schedule' || contains(github.ref, 'main') || contains(github.ref, 'master') || startsWith(github.ref, 'refs/heads/v_')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -141,7 +141,7 @@ jobs:
 
   # Full test suite (only on main/master branch or schedule)
   test-comprehensive:
-    if: github.event_name == 'schedule' || contains(github.ref, 'main') || contains(github.ref, 'master')
+    if: github.event_name == 'schedule' || contains(github.ref, 'main') || contains(github.ref, 'master') || startsWith(github.ref, 'refs/heads/v_')
     runs-on: ubuntu-latest
     name: Comprehensive Tests
     
