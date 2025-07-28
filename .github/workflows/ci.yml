@@ -64,7 +64,8 @@ jobs:
     
     - name: Run all tests
       run: |
-        python -m pytest tests/unit/ tests/integration/ tests/system/ -v --cov=tiny_torch --cov-report=xml
+        # Skip CUDA tests on CI (no GPU available)
+        python -m pytest tests/unit/ tests/integration/ tests/system/ -v --cov=tiny_torch --cov-report=xml -m "not cuda"
 
   # Extended tests (only run on schedule or specific branches)
   test-extended:
@@ -110,7 +111,9 @@ jobs:
       run: pip install -e .
     
     - name: Run comprehensive tests
-      run: python -m pytest tests/ -v
+      run: |
+        # Skip CUDA tests on CI (no GPU available)
+        python -m pytest tests/ -v -m "not cuda"
 
   # Quick lint check (runs on every PR/push)
   lint:
@@ -184,7 +187,8 @@ jobs:
     
     - name: Run comprehensive Python tests with coverage
       run: |
-        python -m pytest tests/ --cov=tiny_torch --cov-report=xml --cov-report=html --cov-fail-under=60
+        # Skip CUDA tests on CI (no GPU available)  
+        python -m pytest tests/ --cov=tiny_torch --cov-report=xml --cov-report=html --cov-fail-under=60 -m "not cuda"
     
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3

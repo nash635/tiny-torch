@@ -35,8 +35,9 @@ class CudaTestUtils:
                         if len(parts) > 1:
                             info['driver_version'] = parts[1].split()[0]
                         break
-        except (subprocess.SubprocessError, subprocess.TimeoutExpired):
-            pass
+        except (subprocess.SubprocessError, subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            # nvidia-smi not available (common on CI servers without GPU)
+            info['driver_available'] = False
         
         # Check nvcc compiler
         try:
@@ -51,8 +52,9 @@ class CudaTestUtils:
                             if 'release' in part.lower():
                                 info['nvcc_version'] = part.strip().split()[-1]
                         break
-        except (subprocess.SubprocessError, subprocess.TimeoutExpired):
-            pass
+        except (subprocess.SubprocessError, subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            # nvcc not available (common on CI servers without CUDA toolkit)
+            info['nvcc_available'] = False
         
         # Get GPU count and info
         if info['driver_available']:
@@ -71,8 +73,10 @@ class CudaTestUtils:
                                     'memory': parts[1].strip()
                                 })
                     info['gpu_count'] = len(info['gpus'])
-            except (subprocess.SubprocessError, subprocess.TimeoutExpired):
-                pass
+            except (subprocess.SubprocessError, subprocess.TimeoutExpired, FileNotFoundError, OSError):
+                # nvidia-smi not available or failed
+                info['gpu_count'] = 0
+                info['gpus'] = []
         
         return info
     

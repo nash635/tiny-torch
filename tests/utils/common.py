@@ -66,16 +66,17 @@ class TestEnvironment:
         try:
             result = subprocess.run(['nvidia-smi'], capture_output=True, timeout=10)
             return result.returncode == 0
-        except (FileNotFoundError, subprocess.SubprocessError, subprocess.TimeoutExpired):
+        except (FileNotFoundError, subprocess.SubprocessError, subprocess.TimeoutExpired, OSError):
             return False
     
     @staticmethod
     def is_nvcc_available() -> bool:
         """Check if nvcc compiler is available."""
-        # Use centralized CUDA detection
-        from tests.utils.cuda import CudaTestUtils
-        info = CudaTestUtils.get_cuda_info()
-        return info['nvcc_available'] and info['nvcc_version'] is not None
+        try:
+            result = subprocess.run(['nvcc', '--version'], capture_output=True, timeout=10)
+            return result.returncode == 0
+        except (FileNotFoundError, subprocess.SubprocessError, subprocess.TimeoutExpired, OSError):
+            return False
     
     @staticmethod
     def is_build_available() -> bool:
