@@ -9,6 +9,13 @@ import subprocess
 import platform
 from pathlib import Path
 
+# Import centralized CUDA utilities
+try:
+    from tests.utils.cuda import CudaTestUtils
+except ImportError:
+    # If running from different context, define minimal fallback
+    CudaTestUtils = None
+
 def check_python_version():
     """检查Python版本"""
     version = sys.version_info
@@ -37,49 +44,59 @@ def check_cmake():
         raise RuntimeError("CMake not found. Please install CMake 3.18+")
 
 def check_cuda():
-    """检查CUDA环境"""
-    cuda_info = {
-        'available': False,
-        'version': None,
-        'home': None,
-        'nvcc_path': None
-    }
-    
-    try:
-        # 检查nvcc
-        result = subprocess.run(
-            ["nvcc", "--version"], 
-            capture_output=True, 
-            text=True, 
-            check=True
-        )
+    """检查CUDA环境 - 使用统一的CudaTestUtils"""
+    if CudaTestUtils is None:
+        # Fallback implementation
+        cuda_info = {
+            'available': False,
+            'version': None,
+            'home': None,
+            'nvcc_path': None
+        }
         
-        # 解析版本
-        for line in result.stdout.split('\n'):
-            if 'release' in line:
-                version = line.split('release')[1].split(',')[0].strip()
-                cuda_info['version'] = version
-                break
-        
-        # 检查CUDA_HOME
-        cuda_home = os.environ.get('CUDA_HOME')
-        if not cuda_home:
-            # 尝试常见路径
-            common_paths = ['/usr/local/cuda', '/opt/cuda']
-            for path in common_paths:
-                if os.path.exists(path):
-                    cuda_home = path
+        try:
+            result = subprocess.run(
+                ["nvcc", "--version"], 
+                capture_output=True, 
+                text=True, 
+                check=True
+            )
+            
+            # 解析版本
+            for line in result.stdout.split('\n'):
+                if 'release' in line:
+                    version = line.split('release')[1].split(',')[0].strip()
+                    cuda_info['version'] = version
                     break
+            
+            # 检查CUDA_HOME
+            cuda_home = os.environ.get('CUDA_HOME')
+            if not cuda_home:
+                # 尝试常见路径
+                common_paths = ['/usr/local/cuda', '/opt/cuda']
+                for path in common_paths:
+                    if os.path.exists(path):
+                        cuda_home = path
+                        break
+            
+            if cuda_home and os.path.exists(cuda_home):
+                cuda_info['home'] = cuda_home
+                cuda_info['nvcc_path'] = os.path.join(cuda_home, 'bin', 'nvcc')
+                cuda_info['available'] = True
+                
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            pass
         
-        if cuda_home and os.path.exists(cuda_home):
-            cuda_info['home'] = cuda_home
-            cuda_info['nvcc_path'] = os.path.join(cuda_home, 'bin', 'nvcc')
-            cuda_info['available'] = True
-        
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        pass
-    
-    return cuda_info
+        return cuda_info
+    else:
+        # Use centralized implementation
+        info = CudaTestUtils.get_cuda_info()
+        return {
+            'available': info['nvcc_available'],
+            'version': info['nvcc_version'],
+            'home': os.environ.get('CUDA_HOME'),
+            'nvcc_path': None  # Not provided by CudaTestUtils
+        }
 
 def check_compiler():
     """检查C++编译器"""

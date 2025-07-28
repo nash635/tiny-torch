@@ -1,7 +1,15 @@
 # Phase 1.1 Comprehensive Documentation - Tiny-Torch Build System and Infrastructure
 
 **Version**: v1.0  
-**Applicable Phase**: Phase 1.1 Build System Setup  
+**Applicable Phase**: Ph```bash
+# Run all tests
+pytest tests/ -v
+
+# Run CUDA tests only
+pytest tests/ -v -m cuda
+
+# Run specific test file
+pytest tests/test_tensor.py -vuild System Setup  
 **Last Updated**: 2025-06-18  
 
 ## Overview
@@ -44,7 +52,7 @@ tiny-tiny_torch/
 │   ├── autograd/           # Autograd Python interface
 │   ├── cuda/               # CUDA support
 │   └── nn/                 # Neural network modules
-├── test/                    # Test code
+├── tests/                    # Test code
 │   ├── cpp/                # C++ tests
 │   └── *.py                # Python tests
 ├── build/                   # Build artifacts
@@ -119,25 +127,30 @@ export VERBOSE=0            # Concise output
 # Build and run C++ tests
 cd build/cmake
 make tiny_torch_cpp_tests
-./test/cpp/tiny_torch_cpp_tests
+```bash
+# Run C++ tests
+./tests/cpp/tiny_torch_cpp_tests
+```
+
+### Python Tests
 ```
 
 ### Python Tests
 ```bash
 # Run all tests
-pytest test/ -v
+pytest tests/ -v
 
 # Run CUDA tests
-pytest test/ -v -m cuda
+pytest tests/ -v -m cuda
 
 # Run specific tests
-pytest test/test_tensor.py -v
+pytest tests/test_tensor.py -v
 ```
 
 ### Verification Scripts
 ```bash
 # Phase 1.1 complete verification
-python test/verify_phase1_1.py
+python tests/verify_phase1_1.py
 
 # Build system diagnostics
 python tools/diagnose_build.py
@@ -151,7 +164,8 @@ python tools/diagnose_build.py
 make build
 
 # 2. Run relevant tests
-pytest test/test_specific.py
+# Run specific test cases
+pytest tests/test_specific.py
 
 # 3. Check build status
 make diagnose

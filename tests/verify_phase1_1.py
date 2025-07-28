@@ -10,7 +10,7 @@ from pathlib import Path
 
 # 获取项目根目录
 if '__file__' in globals():
-    PROJECT_ROOT = Path(__file__).parent.parent  # 从test/目录向上一级到项目根目录
+    PROJECT_ROOT = Path(__file__).parent.parent  # 从tests/目录向上一级到项目根目录
 else:
     PROJECT_ROOT = Path.cwd()
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -41,7 +41,6 @@ def check_files():
         # 文档
         "LICENSE": "许可证文件",
         "README.md": "项目说明文档",
-        "CHANGELOG.md": "更新日志",
         
         # 脚本和工具
         "tools/build.sh": "构建脚本",
@@ -56,8 +55,8 @@ def check_files():
         "tiny_torch/py.typed": "类型提示标记文件",
         
         # 测试
-        "test/__init__.py": "测试包初始化",
-        "test/test_build_system.py": "构建系统测试",
+        "tests/__init__.py": "测试包初始化",
+        "tests/run_tests.py": "统一测试运行器",
     }
     
     missing_files = []
@@ -85,7 +84,7 @@ def check_directories():
         "csrc/autograd": "自动微分C++实现",
         "tiny_torch/nn/modules": "神经网络模块",
         "tiny_torch/_C": "C扩展绑定目录",
-        "test/cpp": "C++测试目录",
+        "tests/cpp": "C++测试目录",
         "benchmarks/cpp": "C++性能测试",
     }
     

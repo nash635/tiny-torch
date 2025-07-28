@@ -105,7 +105,7 @@ python -c "import tiny_torch; print(tiny_torch.__version__)"
 ./docker/build.sh shell
 
 # 在容器内使用开发工具
-pytest test/                  # 运行测试
+pytest tests/                  # 运行测试
 black .                      # 代码格式化
 mypy tiny_torch/                  # 类型检查
 ```

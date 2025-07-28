@@ -9,20 +9,22 @@ help:
 	@echo "======================="
 	@echo "Available targets:"
 	@echo "  help        - Show this help message"
+	@echo "  status      - Quick status check"
 	@echo "  diagnose    - Run build diagnostics"
 	@echo "  clean       - Clean build artifacts"
 	@echo "  build       - Build C++ extensions only"
 	@echo "  install     - Complete installation (recommended)"
 	@echo "  install-full- Full installation with diagnostics"
-	@echo "  test        - Run tests"
-	@echo "  test-cuda   - Run CUDA tests"
+	@echo "  test        - Run tests (includes phase verification)"
+	@echo "  test-cuda   - Run CUDA tests (auto-skip if no CUDA)"
+	@echo "  test-no-cuda- Run tests excluding CUDA tests"
 	@echo "  lint        - Run code quality checks"
 	@echo "  format      - Format code"
 	@echo "  docs        - Build documentation"
 	@echo "  benchmark   - Run benchmarks"
 	@echo ""
 	@echo "Recommended workflow:"
-	@echo "  make install  # First-time or production setup"
+	@echo "  pip install -r requirements.txt  # Install dependencies once"
 	@echo "  make build    # Development/quick compilation"
 	@echo "  make test     # Verify functionality"
 	@echo ""
@@ -40,10 +42,11 @@ clean:
 	rm -rf dist/
 	rm -rf *.egg-info/
 	rm -rf tiny_torch/_C*.so
-	rm -rf **/__pycache__/
 	rm -rf .pytest_cache/
 	rm -rf htmlcov/
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -name "*.pyc" -delete
+	find . -name "*.pyo" -delete
 	find . -name "*.so" -delete
 	@echo "Clean completed."
 
@@ -51,6 +54,11 @@ clean:
 diagnose:
 	@echo "Running build diagnostics..."
 	python3 tools/diagnose_build.py
+
+# Quick status check
+status:
+	@echo "Quick status check..."
+	python3 tools/diagnose_build.py --quick
 
 # Build project
 build:
@@ -78,14 +86,25 @@ install-full:
 	./tools/install_tiny_torch.sh
 
 # 运行测试
-test: install
+test: build
 	@echo "Running tests..."
-	pytest test/ -v
+	python -m pytest tests/ -v
 
 # 运行CUDA测试
-test-cuda: install
+test-cuda: build
 	@echo "Running CUDA tests..."
-	pytest test/ -v -m cuda
+	@if python tools/check_cuda.py; then \
+		echo "CUDA available - running CUDA-specific tests"; \
+		python -m pytest tests/ -v -m cuda; \
+	else \
+		echo "CUDA not available - skipping CUDA tests"; \
+		echo "Use 'make test' to run all non-CUDA tests"; \
+	fi
+
+# 运行非CUDA测试
+test-no-cuda: build
+	@echo "Running tests without CUDA..."
+	python -m pytest tests/ -v -m "not cuda"
 
 # 代码质量检查
 lint:
