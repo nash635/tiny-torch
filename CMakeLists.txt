@@ -305,7 +305,7 @@ install(TARGETS _C DESTINATION tiny_torch)
 # Tests
 if(BUILD_TESTS)
     enable_testing()
-    add_subdirectory(test/cpp)
+    add_subdirectory(tests/cpp)
 endif()
 
 # Benchmarks

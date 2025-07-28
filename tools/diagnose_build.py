@@ -11,6 +11,58 @@ import subprocess
 from pathlib import Path
 import glob
 
+def quick_status_check():
+    """Quick status check for development workflow"""
+    print("🔧 Tiny-Torch Quick Status")
+    print("=" * 30)
+    
+    # Check if we're in the right directory
+    if not Path("pyproject.toml").exists():
+        print("❌ Not in tiny-torch root directory")
+        return False
+    
+    # Check Python version
+    if sys.version_info < (3, 8):
+        print(f"❌ Python {sys.version_info[:2]} < 3.8")
+        return False
+    print(f"✅ Python {sys.version_info[:2]}")
+    
+    # Check key tools
+    tools = {"cmake": "CMake", "ninja": "Ninja", "make": "Make"}
+    missing = []
+    for cmd, name in tools.items():
+        try:
+            subprocess.run([cmd, "--version"], capture_output=True, check=True, timeout=3)
+            print(f"✅ {name}")
+        except:
+            print(f"❌ {name}")
+            missing.append(name)
+    
+    # Check build status
+    if Path("build").exists():
+        print("📁 Build directory exists")
+    else:
+        print("📂 No build directory")
+    
+    # Check if installed
+    try:
+        import tiny_torch
+        print("✅ tiny_torch importable")
+    except ImportError:
+        print("❌ tiny_torch not installed")
+    
+    # Summary
+    print("\n" + "=" * 30)
+    if missing:
+        print(f"⚠️  Missing tools: {', '.join(missing)}")
+        print("💡 Run 'make diagnose' for detailed help")
+    else:
+        print("🎉 All essential tools available!")
+        print("💡 Ready for 'make build' or 'make test'")
+    
+    # Only fail if critical tools are missing
+    return len(missing) == 0
+
 def print_section(title):
     print(f"\n{'='*60}")
     print(f"  {title}")
@@ -49,6 +101,19 @@ def run_command(cmd, description, capture_output=True):
         return None
 
 def main():
+    # Check for quick mode first
+    if "--quick" in sys.argv:
+        return quick_status_check()
+    
+    # Run quick status check first
+    quick_status_ok = quick_status_check()
+    
+    # Show transition message
+    if quick_status_ok:
+        print("\n" + "💡 " + "="*50)
+        print("  Quick check passed! Detailed diagnostics below...")
+        print("  " + "="*50)
+    
     print_section("Tiny-Torch Build Diagnostic")
     
     # 1. Environment check
@@ -187,5 +252,9 @@ def main():
         return True
 
 if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    try:
+        success = main()
+        sys.exit(0 if success else 1)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)

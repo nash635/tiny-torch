@@ -101,7 +101,7 @@ pip install -e .
 python -c "import tiny_torch; print('Installation successful:', tiny_torch.__version__)"
 
 # Complete verification
-python test/verify_phase1_1.py
+python tests/verify_phase1_1.py
 ```
 ## Additional Features
 
@@ -172,7 +172,7 @@ tiny-torch/
 │   ├── optim/                 # Optimizers
 │   ├── autograd/              # Autograd interface
 │   └── cuda/                  # CUDA support
-├── test/                      # Test suite
+├── tests/                      # Test suite
 │   ├── cpp/                   # C++ tests
 │   └── *.py                   # Python tests
 └── docs/                      # Documentation
@@ -197,26 +197,26 @@ tiny-torch/
 - **Advanced Features** - Higher-order gradients, JIT compilation
 
 ### Phase 4: Neural Network Modules [Planned]
-- **Module基类** - Parameter management, state synchronization
-- **卷积层** - Conv2d, BatchNorm2d, pooling layers  
-- **ResNet组件** - BasicBlock, Bottleneck, ResNet architecture
-- **损失函数** - CrossEntropy, MSE, etc.
+- **Module Base Class** - Parameter management, state synchronization
+- **Convolution Layers** - Conv2d, BatchNorm2d, pooling layers  
+- **ResNet Components** - BasicBlock, Bottleneck, ResNet architecture
+- **Loss Functions** - CrossEntropy, MSE, etc.
 
 ### Phase 5: Distributed Training Framework [Key Addition]
-- **通信后端** - NCCL integration, process group management
-- **数据并行** - DistributedDataParallel (DDP)
-- **模型并行** - Large model sharding, pipeline parallelism
-- **混合并行** - Data + model parallel strategies
+- **Communication Backend** - NCCL integration, process group management
+- **Data Parallelism** - DistributedDataParallel (DDP)
+- **Model Parallelism** - Large model sharding, pipeline parallelism
+- **Hybrid Parallelism** - Data + model parallel strategies
 
 ### Phase 6: Optimizers and Tools Ecosystem [Planned]
-- **优化器** - SGD, Adam, distributed optimizers
-- **数据加载** - DistributedSampler, multi-process loading
-- **模型保存** - Distributed checkpoints, model sharding
+- **Optimizers** - SGD, Adam, distributed optimizers
+- **Data Loading** - DistributedSampler, multi-process loading
+- **Model Saving** - Distributed checkpoints, model sharding
 
 ### Phase 7: ResNet50 Validation [Final Goal]
-- **ImageNet训练** - Multi-node multi-GPU ResNet50 training
-- **性能对标** - Performance comparison with PyTorch
-- **Accuracy validation** - Top-1准确率 > 75%
+- **ImageNet Training** - Multi-node multi-GPU ResNet50 training
+- **Performance Benchmarking** - Performance comparison with PyTorch
+- **Accuracy Validation** - Top-1 accuracy > 75%
 
 
 ## Testing and Validation
@@ -224,49 +224,49 @@ tiny-torch/
 ### Quick Verification
 
 ```bash
-# 完整测试套件（推荐）
+# Complete test suite (recommended)
 make test
 
-# 基础功能验证
-python -c "import tiny_torch; print('导入成功')"
+# Basic functionality verification
+python -c "import tiny_torch; print('Import successful')"
 
-# 构建诊断
+# Build diagnostics
 make diagnose
 ```
 
 ### Detailed Testing
 
 ```bash
-# Python测试套件
-python -m pytest test/ -v
+# Python test suite
+python -m pytest tests/ -v
 
-# CUDA功能测试
-python test/test_cuda.py --env
+# CUDA functionality tests
+python tests/test_cuda.py --env
 
-# C++单元测试
+# C++ unit tests
 cd build/cmake && ./test/cpp/tiny_torch_cpp_tests
 
-# 验证Phase 1.1完成度
-python test/verify_phase1_1.py
+# Verify Phase 1.1 completion
+python tests/verify_phase1_1.py
 ```
 
 ### Test Coverage
 
-- **构建系统**: 100% (CMake + Ninja + setuptools)
-- **Python集成**: 95% (模块导入、错误处理、API)  
-- **CUDA支持**: 90% (编译、运行时、设备管理)
-- **基础架构**: 95% (项目结构、依赖管理)
+- **Build System**: 100% (CMake + Ninja + setuptools)
+- **Python Integration**: 95% (module import, error handling, API)  
+- **CUDA Support**: 90% (compilation, runtime, device management)
+- **Infrastructure**: 95% (project structure, dependency management)
 
 ### Troubleshooting
 
 ```bash
-# 构建问题诊断
+# Build issue diagnostics
 python tools/diagnose_build.py
 
-# 环境检查
+# Environment check
 python tools/check_env.py
 
-# 重新安装
+# Reinstall
 make clean && make install
 ```
 
@@ -274,80 +274,80 @@ make clean && make install
 
 ### Build Commands
 
-| 命令 | 功能 | 适用场景 |
-|------|------|----------|
-| `make install` | 完整安装 | 生产环境、首次安装 |
-| `make build` | 仅编译 | 开发调试、快速测试 |
-| `make test` | 运行测试 | 验证功能 |
-| `make clean` | 清理 | 解决构建问题 |
-| `make diagnose` | 诊断 | 排查构建问题 |
+| Command | Function | Use Case |
+|---------|----------|----------|
+| `make install` | Complete installation | Production environment, first-time install |
+| `make build` | Compile only | Development debugging, quick testing |
+| `make test` | Run tests | Feature verification |
+| `make clean` | Clean | Resolve build issues |
+| `make diagnose` | Diagnose | Troubleshoot build problems |
 
 ### Build Options
 
 ```bash
-# 环境变量控制构建
-DEBUG=1 make install         # Debug模式
-WITH_CUDA=0 make install     # 禁用CUDA
-USE_NINJA=1 make install     # 强制使用Ninja
-VERBOSE=1 make install       # 详细输出
+# Environment variable build control
+DEBUG=1 make install         # Debug mode
+WITH_CUDA=0 make install     # Disable CUDA
+USE_NINJA=1 make install     # Force use Ninja
+VERBOSE=1 make install       # Verbose output
 ```
 
 ### Build Artifacts
 
-| 产物 | 位置 | 说明 |
-|------|------|------|
-| **C++静态库** | `build/cmake/libtiny_torch_cpp.a` | 编译后的C++核心库 |
-| **Python扩展** | `tiny_torch/_C.cpython-*.so` | Python可导入的C++扩展 |
-| **CUDA内核** | `build/cmake/*.cu.o` | 编译后的CUDA对象文件 |
-| **测试程序** | `build/cmake/test/cpp/tiny_torch_cpp_tests` | C++测试程序 |
+| Artifact | Location | Description |
+|----------|----------|-------------|
+| **C++ Static Library** | `build/cmake/libtiny_torch_cpp.a` | Compiled C++ core library |
+| **Python Extension** | `tiny_torch/_C.cpython-*.so` | Python-importable C++ extension |
+| **CUDA Kernels** | `build/cmake/*.cu.o` | Compiled CUDA object files |
+| **Test Programs** | `build/cmake/test/cpp/tiny_torch_cpp_tests` | C++ test programs |
 
 ## Contributing
 
 ### How to Contribute
 
-1. Fork本项目
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add amazing feature'`)
-4. 推送分支 (`git push origin feature/amazing-feature`)
-5. 创建Pull Request
+1. Fork this project
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push branch (`git push origin feature/amazing-feature`)
+5. Create Pull Request
 
 ### Development Standards
 
-- **C++**: 遵循PyTorch代码风格
-- **Python**: 遵循PEP 8规范
-- **测试**: 确保所有测试通过
-- **文档**: 添加必要的注释和文档
+- **C++**: Follow PyTorch coding style
+- **Python**: Follow PEP 8 standards
+- **Testing**: Ensure all tests pass
+- **Documentation**: Add necessary comments and documentation
 
 ## Learning Value
 
-通过实现Tiny-Torch，深入掌握：
+Through implementing Tiny-Torch, gain deep understanding of:
 
-- **底层系统设计** - Memory management, device abstraction, type system
-- **计算图和自动微分** - 动态图构建、反向传播算法
-- **高性能计算** - SIMD优化、GPU编程、内存层次
-- **系统集成** - Python C扩展、构建系统、API设计
+- **Low-level System Design** - Memory management, device abstraction, type system
+- **Computation Graph and Automatic Differentiation** - Dynamic graph construction, backpropagation algorithms
+- **High-Performance Computing** - SIMD optimization, GPU programming, memory hierarchy
+- **System Integration** - Python C extensions, build systems, API design
 
 ## License
 
-本项目采用 **Apache License 2.0**，确保开源友好和商业兼容。
+This project uses **Apache License 2.0**, ensuring open-source friendliness and commercial compatibility.
 
-### License特点
+### License Features
 
-- **开源友好**: 允许自由使用、修改和分发
-- **商业兼容**: 可用于商业项目，包括专利保护
-- **学术研究**: 适合教育和研究用途
-- **现代标准**: 广泛采用的现代开源许可证
+- **Open Source Friendly**: Free to use, modify, and distribute
+- **Commercial Compatible**: Suitable for commercial projects, including patent protection
+- **Academic Research**: Suitable for educational and research purposes
+- **Modern Standard**: Widely adopted modern open-source license
 
 ### Related Files
 
-- [LICENSE](LICENSE) - 完整许可证文本
-- [CONTRIBUTING.md](CONTRIBUTING.md) - 贡献指南
-- [CHANGELOG.md](CHANGELOG.md) - 版本更新记录
+- [LICENSE](LICENSE) - Complete license text
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
+- [CHANGELOG.md](CHANGELOG.md) - Version update history
 
-在使用本项目时，请保留版权声明和许可证信息。详细条款请参阅 [LICENSE](LICENSE) 文件。
+When using this project, please retain copyright notices and license information. For detailed terms, please refer to the [LICENSE](LICENSE) file.
 
 ---
 
-**开始您的深度学习框架探索之旅！**
+**Start Your Deep Learning Framework Exploration Journey!**
 
-通过实现Tiny-Torch，获得对现代深度学习框架底层机制的深刻理解。
+Through implementing Tiny-Torch, gain deep understanding of the underlying mechanisms of modern deep learning frameworks.

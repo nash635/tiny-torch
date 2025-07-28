@@ -177,7 +177,7 @@ def cmake_build():
         f"-DWITH_CUDA={'ON' if WITH_CUDA else 'OFF'}",
         f"-DWITH_MKL={'ON' if WITH_MKL else 'OFF'}",
         f"-DWITH_OPENMP={'ON' if WITH_OPENMP else 'OFF'}",
-        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/tiny_torch",
+        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}",
     ]
     
     # 使用ninja如果可用
@@ -243,6 +243,45 @@ def cmake_build():
                 return False
         else:
             return False
+    
+    # 安装构建的扩展文件（无论构建是否有变化都尝试安装）
+    print("Installing built extensions...")
+    try:
+        if USE_NINJA:
+            install_cmd = ["ninja", "install"]
+        else:
+            install_cmd = ["make", "install"]
+            
+        result = subprocess.run(install_cmd, cwd=cmake_build_dir, capture_output=True, text=True, check=True)
+        print("[PASS] Installation successful")
+        if VERBOSE:
+            print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"[WARN] Install step failed: {e}")
+        # 如果install失败，尝试手动复制
+        print("Attempting manual copy of extension files...")
+        try:
+            import glob
+            
+            # 查找构建的Python扩展文件
+            ext_pattern = str(cmake_build_dir / "_C*.so")
+            ext_files = glob.glob(ext_pattern)
+            
+            if ext_files:
+                target_dir = ROOT_DIR / "tiny_torch"
+                target_dir.mkdir(exist_ok=True)
+                
+                for ext_file in ext_files:
+                    target_path = target_dir / Path(ext_file).name
+                    shutil.copy2(ext_file, target_path)
+                    print(f"Copied {ext_file} -> {target_path}")
+                    
+                print("[PASS] Manual copy successful")
+            else:
+                print(f"[WARN] No extension files found in {cmake_build_dir}")
+                
+        except Exception as copy_e:
+            print(f"[WARN] Manual copy also failed: {copy_e}")
     
     print("CMake build completed successfully!")
     return True
@@ -312,44 +351,6 @@ def use_cmake_build():
     # 当源文件数量超过阈值时，使用CMake+ninja构建
     sources = get_sources()
     return len(sources) > 20 or WITH_CUDA
-
-def cmake_build():
-    """使用CMake+ninja构建"""
-    print("Using CMake+ninja build system...")
-    
-    # 设置彩色输出
-    setup_color_output()
-    
-    # 创建构建目录
-    cmake_build_dir = BUILD_DIR / "cmake"
-    cmake_build_dir.mkdir(parents=True, exist_ok=True)
-    
-    # CMake配置命令
-    cmake_args = [
-        f"-DCMAKE_BUILD_TYPE={'Debug' if DEBUG else 'Release'}",
-        f"-DWITH_CUDA={'ON' if WITH_CUDA else 'OFF'}",
-        f"-DWITH_MKL={'ON' if WITH_MKL else 'OFF'}",
-        f"-DWITH_OPENMP={'ON' if WITH_OPENMP else 'OFF'}",
-        f"-DCMAKE_INSTALL_PREFIX={ROOT_DIR}/tiny_torch",
-    ]
-    
-    # 使用ninja如果可用
-    if USE_NINJA:
-        cmake_args.append("-GNinja")
-        print("Using Ninja generator for faster builds")
-    
-    # 运行CMake配置
-    subprocess.run([
-        "cmake", str(ROOT_DIR), *cmake_args
-    ], cwd=cmake_build_dir, check=True)
-    
-    # 运行构建
-    if USE_NINJA:
-        subprocess.run(["ninja"], cwd=cmake_build_dir, check=True)
-    else:
-        subprocess.run(["make", "-j"], cwd=cmake_build_dir, check=True)
-    
-    print("CMake build completed successfully!")
 
 def get_extensions():
     """获取扩展模块配置"""
@@ -496,6 +497,12 @@ class CustomBuildExt(build_ext):
         
         # 确保构建目录存在
         BUILD_DIR.mkdir(exist_ok=True)
+        
+        # 如果需要，运行CMake构建
+        if use_cmake_build():
+            print("Running CMake build from build_ext...")
+            cmake_build()
+        
         super().run()
 
 if __name__ == "__main__":

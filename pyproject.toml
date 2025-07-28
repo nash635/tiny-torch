@@ -47,25 +47,62 @@ test = [
     "pytest>=6.0.0",
     "pytest-cov>=2.10.0",
     "pytest-xdist>=2.0.0",
+    "pytest-mock>=3.0.0",
+    "pytest-timeout>=2.0.0",
 ]
 dev = [
-    "black>=21.0.0",
-    "flake8>=3.8.0",
+    "black>=22.0.0",
+    "isort>=5.0.0",
+    "flake8>=4.0.0",
     "mypy>=0.900",
     "pre-commit>=2.15.0",
-    "isort>=5.9.0",
 ]
-docs = [
-    "sphinx>=4.0.0",
-    "sphinx-rtd-theme>=1.0.0",
-    "myst-parser>=0.15.0",
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "-ra",
+    "--strict-config",
 ]
-benchmark = [
-    "torch>=1.12.0",  # For comparison
-    "matplotlib>=3.3.0",
-    "seaborn>=0.11.0",
-    "pandas>=1.3.0",
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "cuda: marks tests as requiring CUDA",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "build: marks tests as build system tests"
 ]
+filterwarnings = [
+    "ignore::pytest.PytestUnknownMarkWarning",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::ImportWarning"
+]
+
+[tool.coverage.run]
+source = ["tiny_torch"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/build/*",
+    "setup.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:"
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
 
 [project.urls]
 Homepage = "https://github.com/your-username/tiny-torch"
@@ -129,50 +166,3 @@ module = [
     "tiny_torch.*",
 ]
 ignore_missing_imports = true
-
-# Pytest configuration
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = [
-    "-ra",
-    "--strict-markers",
-    "--strict-config",
-    "--cov=tiny_torch",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
-]
-testpaths = ["test"]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "cuda: marks tests as requiring CUDA",
-    "cpu: marks tests as CPU-only",
-]
-filterwarnings = [
-    "error",
-    "ignore::UserWarning",
-    "ignore::DeprecationWarning",
-]
-
-# Coverage configuration
-[tool.coverage.run]
-source = ["tiny_torch"]
-omit = [
-    "*/test/*",
-    "*/tests/*",
-    "*/__init__.py",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]

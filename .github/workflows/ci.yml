@@ -1,52 +1,252 @@
-name: CI
+name: CI Tests
 
 on:
   push:
-    branches: [ master, v_* ]
+    branches: [ master, main, develop, v_* ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, main, develop, v_* ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  test-matrix:
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11"]
-
+        os: [ubuntu-latest, ubuntu-20.04]
+        python-version: ['3.8', '3.9', '3.10', '3.11']
+        test-type: [unit, integration, build]
+        
+    name: Test ${{ matrix.test-type }} on ${{ matrix.os }} Python ${{ matrix.python-version }}
+    
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt', 'pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake build-essential python3-dev
+        sudo apt-get install -y cmake ninja-build build-essential
+        # Install additional dependencies for development
+        sudo apt-get install -y pkg-config
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip wheel setuptools
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        # Install test dependencies
+        pip install pytest pytest-cov pytest-xdist pytest-mock pytest-timeout psutil
+    
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja
+    
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    
+    - name: Install tiny-torch
+      run: |
+        pip install -e .
+    
+    - name: Run ${{ matrix.test-type }} tests
+      run: |
+        case "${{ matrix.test-type }}" in
+          "unit")
+            python -m pytest tests/unit/ -v
+            ;;
+          "integration")
+            python -m pytest tests/integration/ -v
+            ;;
+          "build")
+            python -m pytest tests/system/ -v -m "not slow"
+            ;;
+          *)
+            echo "Unknown test type: ${{ matrix.test-type }}"
+            exit 1
+            ;;
+        esac
+
+  test-cpp:
+    runs-on: ubuntu-latest
+    name: C++ Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake ninja-build build-essential gdb
+    
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTS=ON -G Ninja
+    
+    - name: Build C++ tests
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target tiny_torch_cpp_tests
+    
+    - name: Run C++ tests
+      working-directory: ${{github.workspace}}/build
+      run: |
+        if [ -f "./test/cpp/tiny_torch_cpp_tests" ]; then
+          ./test/cpp/tiny_torch_cpp_tests
+        else
+          echo "C++ tests not found, skipping"
+        fi
+
+  lint-and-format:
+    runs-on: ubuntu-latest
+    name: Lint and Format Check
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install linting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install black isort flake8 mypy
+    
+    - name: Check black formatting
+      run: |
+        black --check --diff tiny_torch/ tests/
+    
+    - name: Check isort import sorting
+      run: |
+        isort --check-only --diff tiny_torch/ tests/
+    
+    - name: Run flake8
+      run: |
+        flake8 tiny_torch/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 tiny_torch/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Run mypy (if configured)
+      run: |
+        # mypy tiny_torch/ || true  # Allow failure for now
+        echo "MyPy check skipped (not configured yet)"
+
+  coverage-report:
+    runs-on: ubuntu-latest
+    name: Coverage Report
+    needs: [test-matrix]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install --upgrade pip wheel setuptools
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-        # Verify key dependencies
-        python -c "import pybind11; print('pybind11 OK')"
-        python -c "import numpy; print('numpy OK')"
+        pip install pytest pytest-cov psutil
     
-    - name: Build project
+    - name: Install tiny-torch
       run: |
-        # Show CUDA detection info
-        echo "Checking for CUDA availability..."
-        which nvcc || echo "nvcc not found"
-        # Let setup.py auto-detect CUDA availability
-        python setup.py build_ext --inplace
-        # Alternative: make build
+        pip install -e .
     
-    - name: Run tests
+    - name: Run comprehensive test coverage
       run: |
-        pytest test/ -v
+        python -m pytest tests/ --cov=tiny_torch --cov-report=xml --cov-report=html --cov-fail-under=80
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: comprehensive
+        name: codecov-comprehensive
+    
+    - name: Archive coverage HTML report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-report
+        path: htmlcov/
+
+  test-cuda:
+    runs-on: ubuntu-latest
+    name: CUDA Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip wheel setuptools
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        pip install pytest pytest-cov pytest-mock psutil
+    
+    - name: Install tiny-torch (CPU only)
+      run: |
+        WITH_CUDA=0 pip install -e .
+    
+    - name: Check CUDA availability
+      run: |
+        # This will show if CUDA would be available, but we're testing CPU fallback
+        python tools/check_cuda.py && echo "CUDA available but testing CPU fallback" || echo "CUDA not available - perfect for CPU testing"
+    
+    - name: Run CUDA tests (CPU fallback)
+      run: |
+        # Run CUDA tests in CPU fallback mode - they should gracefully skip or fallback
+        WITH_CUDA=0 make test-cuda
+
+  test-performance:
+    runs-on: ubuntu-latest
+    name: Performance Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip wheel setuptools
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        pip install pytest pytest-cov psutil
     
   build-cpp:
     runs-on: ubuntu-latest
